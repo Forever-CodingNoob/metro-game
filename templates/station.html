@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ station }} {% endblock %}
+{% block content %}
+    <h2>{{ station['name'] }}</h2>
+    <span class="badge badge-primary">等級:{{ station['grade'] }}</span>
+    <span class="badge badge-warning">出口:{{ station['problems'][number-1]['exit'] }}</span>
+    <span class="badge badge-warning">類別:{{ station['problems'][number-1]['type'] }}</span>
+    <hr><br>
+    <h4>
+        <p>{{ station['problems'][number-1]['content'] }}</p>
+        <hr>
+        <p>答案:{{station['problems'][number-1]['answer']}}</p>
+    </h4>
+{% endblock %}
