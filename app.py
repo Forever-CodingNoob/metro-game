@@ -19,6 +19,9 @@ def get_station(station):
 def show_station(station,number):
     station=get_station(station)
     return render_template('station.html',station=station,number=number)
+@app.route('/<string:station>')
+def just_show_station(station):
+    return redirect(url_for('show_station',station=station,number=1))
 @app.route('/')
 def home():
     return render_template('index.html')

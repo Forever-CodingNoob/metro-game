@@ -2,5 +2,13 @@
 
 {% block title %} 捷大{% endblock %}
 {% block content %}
-    <h2>捷大喇</h2>
+    <img src="{{url_for('static', filename= 'img/routemap.png')}}" width="1240" height="1620" usemap="#TestMap">
+    <map name="TestMap">
+        <area title="淡水" href="{{ url_for('just_show_station',station='淡水')}}" coords="135,59,217,100" shape="rect"> 31
+        <area title="紅樹林" href="{{ url_for('just_show_station',station='紅樹林')}}" coords="123,121,212,161" shape="rect">
+        <area title="竹圍" href="{{ url_for('just_show_station',station='竹圍')}}" coords="137,186,210,224" shape="rect">
+        <area title="關渡" href="{{ url_for('just_show_station',station='關渡')}}" coords="139,243,210,282" shape="rect">
+        <area title="忠義" href="{{ url_for('just_show_station',station='忠義')}}" coords="200,284,249,355" shape="rect">
+        <area title="復興崗" href="{{ url_for('just_show_station',station='復興崗')}}" coords="253,286,312,355" shape="rect">
+    </map>
 {% endblock %}
