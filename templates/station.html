@@ -2,14 +2,16 @@
 
 {% block title %} {{ station['name'] }} {% endblock %}
 {% block content %}
-    <h2>{{ station['name'] }}</h2>
+    <div class="title">{{ station['name'] }}</div>
     <span class="badge badge-primary">等級:{{ station['grade'] }}</span>
     <span class="badge badge-warning">出口:{{ station['problems'][number-1]['exit'] }}</span>
     <span class="badge badge-warning">類別:{{ station['problems'][number-1]['type'] }}</span>
     <hr><br>
-    <h4>
+    <div class="text">
         <p>{{ station['problems'][number-1]['content'] }}</p>
+    </div>
         <hr>
+    <div>
         <p>答案:{{station['problems'][number-1]['answer']}}</p>
-    </h4>
+    </div>
 {% endblock %}

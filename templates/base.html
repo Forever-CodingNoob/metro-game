@@ -7,8 +7,31 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
     <title>{% block title %} {% endblock %}</title>
+    <style>
+
+        .title{
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 3em;
+        }
+        .text{
+            font-family: source-han-sans-traditional, sans-serif;
+            font-weight: 200;
+            font-style: normal;
+            font-size: 2em;
+        }
+    </style>
+    <script>
+        (function(d) {
+            var config = {
+            kitId: 'cwx0btc',
+            scriptTimeout: 3000,
+            async: true
+            },
+            h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+        })(document);
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
