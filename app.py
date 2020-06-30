@@ -1,6 +1,5 @@
 from flask import Flask,url_for,redirect,render_template
 import sqlite3
-
 app=Flask(__name__)
 def get_db_connection():
     conn=sqlite3.connect('stations.sqlite')

@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
-
-{% block title %} 捷大{% endblock %}
+{% block title %}捷大{% endblock %}
 {% block content %}
     <img src="{{url_for('static', filename= 'img/routemap.jpg')}}" width="960" height="1286" usemap="#MRTMap">
     <map name="MRTMap">
@@ -19,5 +18,17 @@
         <area title="士林" href="{{url_for('just_show_station',station='士林')}}" coords="384,417,443,451" shape="0">
         <area title="劍潭" href="{{url_for('just_show_station',station='劍潭')}}" coords="386,464,441,496" shape="0">
         <area title="圓山" href="{{url_for('just_show_station',station='圓山')}}" coords="385,506,450,538" shape="0">
+        <area title="民權西路" href="{{url_for('just_show_station',station='民權西路')}}" coords="375,539,467,539,467,567,448,568,446,602,373,602" shape="poly">
+        <area title="雙連" href="{{url_for('just_show_station',station='雙連')}}" coords="334,613,409,644" shape="0">
+        <area title="中山" href="{{url_for('just_show_station',station='中山')}}" coords="371,689,453,689,453,638,405,638,405,658,371,658" shape="poly">
+        <area title="台北車站" href="{{url_for('just_show_station',station='台北車站')}}" coords="370,695,370,774,421,774,421,750,465,749,464,694" shape="poly">
+        <area title="台大醫院" href="{{url_for('just_show_station',station='台大醫院')}}" coords="332,788,410,818" shape="0">
+        <area title="中正紀念堂" href="{{url_for('just_show_station',station='中正紀念堂')}}" coords="334,912,419,911,418,833,373,833,375,875,333,875" shape="poly">
+        <area title="東門" href="{{url_for('just_show_station',station='東門')}}" coords="445,811,510,864" shape="0">
+        <area title="大安森林公園" href="{{url_for('just_show_station',station='大安森林公園')}}" coords="510,798,572,863" shape="0">
+        <area title="大安" href="{{url_for('just_show_station',station='大安')}}" coords="574,811,638,862" shape="0">
+        <area title="信義安和" href="{{url_for('just_show_station',station='信義安和')}}" coords="643,810,644,862,676,862,676,839,708,838,707,809" shape="poly">
+        <area title="台北101/世貿" href="{{url_for('just_show_station',station='台北101/世貿')}}" coords="700,837,699,858,676,859,676,896,754,896,755,859,726,859,727,837" shape="poly">
+        <area title="象山" href="{{url_for('just_show_station',station='象山')}}" coords="743,810,787,861" shape="0">
     </map>
 {% endblock %}
