@@ -1,7 +1,18 @@
 {% extends 'base.html' %}
 {% block title %}捷大{% endblock %}
 {% block content %}
-    <img class="routemap" src="{{url_for('static', filename= 'img/routemap.jpg')}}" width="960" height="1286" usemap="#MRTMap">
+    <style>
+        img[usemap]{
+            border: none;
+            width: 100;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+
+
+    {{url_for('static', filename= 'img/routemap.jpg')}}
+    <img src="{{url_for('static', filename= 'img/routemap.jpg')}}" width="960" height="1286" usemap="#MRTMap">
     <map name="MRTMap">
         <area title="淡水" href="{{url_for('just_show_station',station='淡水')}}" coords="113,78,173,113" shape="rect">
         <area title="紅樹林" href="{{url_for('just_show_station',station='紅樹林')}}" coords="95,129,170,162" shape="0">
@@ -28,7 +39,17 @@
         <area title="大安森林公園" href="{{url_for('just_show_station',station='大安森林公園')}}" coords="510,798,572,863" shape="0">
         <area title="大安" href="{{url_for('just_show_station',station='大安')}}" coords="574,811,638,862" shape="0">
         <area title="信義安和" href="{{url_for('just_show_station',station='信義安和')}}" coords="643,810,644,862,676,862,676,839,708,838,707,809" shape="poly">
-        <area title="台北101/世貿" href="{{url_for('just_show_station',station='台北101/世貿')}}" coords="700,837,699,858,676,859,676,896,754,896,755,859,726,859,727,837" shape="poly">
+        <area title="台北101/世貿" href="{{url_for('just_show_station',station='台北101_世貿')}}" coords="700,837,699,858,676,859,676,896,754,896,755,859,726,859,727,837" shape="poly">
         <area title="象山" href="{{url_for('just_show_station',station='象山')}}" coords="743,810,787,861" shape="0">
     </map>
+
+
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="/static/jquery.rwdImageMaps.min.js"></script>
+    <script>
+        $(document).ready(function(e) {
+            $('img[usemap]').rwdImageMaps();
+        });
+    </script>
 {% endblock %}

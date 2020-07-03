@@ -37,6 +37,7 @@ def get_station(station,problem_number):
 '''
 @app.route('/<string:station>/<int:number>')
 def show_station(station,number):
+    station=station.replace('_','/')#為避免'台北101/世貿'不能作為網址，故連結會導向'台北101_世貿'進入此函數，在此換成'台北101/世貿'!!!!!!!!!
     print(f"station:{station}" , f"number:{number}")
     station=Station(station,number)
     return render_template('station.html',station=station)
