@@ -23,8 +23,10 @@
     <div class="text">
         <p>{{ station['content'] }}</p>
     </div>
+    {% if station['type'].find('題目')!=-1 %}  <!-- if there is '題目' in the type of station's problem -->
         <hr>
-    <div>
-        <p>答案:{{station['answer'] }}</p>
-    </div>
+        <div>
+            <p>答案:{{station['answer'] }}</p>
+        </div>
+    {% endif %}
 {% endblock %}
