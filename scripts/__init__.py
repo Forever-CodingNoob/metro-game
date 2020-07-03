@@ -6,19 +6,25 @@ class Tag:
     @classmethod
     def typeTag(cls,_type):
         _text=f"類別:{_type}"
-        _class=f""
+        if _type=="活動":
+            _class="badge badge-success badge-pill"
+        else:
+            _class="badge badge-dark badge-pill"
         return cls.makeTag(_class, _text)
 
     @classmethod
     def gradeTag(cls, grade):
         _text = f"等級:{grade}"
-        _class = f""
+        if grade == "特殊站":
+            _class = "badge badge-danger badge-pill"
+        else:
+            _class = "badge badge-primary badge-pill"
         return cls.makeTag(_class, _text)
 
     @classmethod
     def exitTag(cls, exit):
         _text=f"出口:{exit}"
-        _class=f""
+        _class= "badge badge-warning"
         return cls.makeTag(_class, _text)
 
     @staticmethod

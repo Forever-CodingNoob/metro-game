@@ -2,23 +2,23 @@
 
 {% block title %} {{ station.name }} {% endblock %}
 {% block content %}
-    <div>
+    <div class="station-title">
         <span class="title">
             {{ station.name }}
         </span>
 
         {% for line in station.lines %}
-                <img src="{{url_for('static',filename=line['imgSRC'])}}"></img>
+                <img class="" src="{{url_for('static',filename=line['imgSRC'])}}"></img>
         {% endfor %}
     </div>
-    <h6>
+    <h4>
         <!--<span class="badge badge-primary">等級:{{ station.grade }}</span>
         <span class="badge badge-warning">出口:{{ station['exit'] }}</span>
         <span class="badge badge-warning">類別:{{ station['type'] }}</span>-->
         {% for tag in station.tags %}
             <span class="{{tag['class']}}">{{tag['text']}}</span>
         {% endfor %}
-    </h6>
+    </h4>
     <hr><br>
     <div class="text">
         <p>{{ station['content'] }}</p>

@@ -14,6 +14,12 @@
             font-family: 'Noto Sans TC', sans-serif;
             font-size: 3em;
         }
+        .navbar{
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .nav-title{
+            font-size: 2em;
+        }
         .text{
             font-family: source-han-sans-traditional, sans-serif;
             font-weight: 200;
@@ -23,6 +29,16 @@
         .routemap{
             width: 100%;
             height: auto;
+        }
+        .station-title{
+            line-height:100px;
+            text-align:center;
+        }
+        .station-title *{
+            vertical-align:middle;
+        }
+        *{
+            /*border:1px solid #000;*/
         }
     </style>
     <script>
@@ -38,7 +54,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('home')}}">捷大</a>
+        <a class="navbar-brand nav-title" href="{{ url_for('home')}}">捷運大大大富翁!</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
