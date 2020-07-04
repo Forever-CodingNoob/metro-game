@@ -1,8 +1,11 @@
-from flask import Flask,url_for,redirect,render_template
+from flask import Flask,url_for,redirect,render_template,flash,Request,request
 import sqlite3
 from scripts import Tag,Line,get_db_connection
+import random
 
 app=Flask(__name__)
+app.config['SECRET_KEY']="".join([chr(random.randint(21,126)) for i in range(10)])
+print(app.secret_key)
 
 
 class Station(dict):
@@ -51,6 +54,11 @@ def img():
 @app.route('/')
 def home():
     return render_template('index.html')
+@app.route('/johnnysucks',methods=('POST',))
+def johnnysucks():
+    flash('你不費吹灰之力就電爆林致中ㄌ')
+    print(request.headers.get("Referer"))
+    return redirect(request.headers.get("Referer"))
 if __name__=='__main__':
     app.run()
 
