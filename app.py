@@ -60,11 +60,7 @@ def home():
 def johnnysucks():
     if 'timestamp' in session:
         timedelta=time.time()-session['timestamp']
-        if timedelta>=120:
-            flash('你不費吹灰之力就電爆林致中ㄌ')
-            session['timestamp'] = time.time()
-        else:
-            flash('林致中已經被電爆ㄌ，請再等%d秒' % int(120-timedelta))
+        flash('林致中已經被電爆ㄌ，請再等%d秒' % int(120-timedelta))
 
     else:
         flash('你不費吹灰之力就電爆林致中ㄌ')
