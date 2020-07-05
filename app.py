@@ -1,12 +1,14 @@
-from flask import Flask,url_for,redirect,render_template,flash,Request,request
+from flask import Flask,url_for,redirect,render_template,flash,Request,request,session
 import sqlite3
 from scripts import Tag,Line,get_db_connection
 import random
+import time
+import datetime
 
 app=Flask(__name__)
 app.config['SECRET_KEY']="".join([chr(random.randint(21,126)) for i in range(10)])
 print(app.secret_key)
-
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=2)
 
 class Station(dict):
     def __init__(self,station,problem_number):
@@ -56,7 +58,17 @@ def home():
     return render_template('index.html')
 @app.route('/johnnysucks',methods=('POST',))
 def johnnysucks():
-    flash('你不費吹灰之力就電爆林致中ㄌ')
+    if 'timestamp' in session:
+        timedelta=time.time()-session['timestamp']
+        if timedelta>=120:
+            flash('你不費吹灰之力就電爆林致中ㄌ')
+            session['timestamp'] = time.time()
+        else:
+            flash('林致中已經被電爆ㄌ，請再等%d秒' % int(120-timedelta))
+
+    else:
+        flash('你不費吹灰之力就電爆林致中ㄌ')
+        session['timestamp']=time.time()
     print(request.headers.get("Referer"))
     return redirect(request.headers.get("Referer"))
 if __name__=='__main__':
