@@ -11,7 +11,7 @@
     </style>
 
 
-    {{url_for('static', filename= 'img/routemap.jpg')}}
+    <!--{{url_for('static', filename= 'img/routemap.jpg')}}-->
     <img src="{{url_for('static', filename= 'img/routemap.jpg')}}" width="960" height="1286" usemap="#MRTMap">
     <map name="MRTMap">
         <area title="淡水" href="{{url_for('just_show_station',station='淡水')}}" coords="113,78,173,113" shape="rect">
