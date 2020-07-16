@@ -28,7 +28,7 @@ def just_show_station(station):
 # @app.route('/favicon.ico')
 # def img():
 #     print("brower is getting favortie icon....")
-#     return "nope"
+#     return redirect(url_for('static',filename='img/favicon.ico'))
 @app.route('/')
 def home():
     return render_template('index.html')
