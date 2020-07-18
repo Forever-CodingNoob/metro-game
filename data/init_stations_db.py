@@ -10,6 +10,7 @@ with open ('content.csv', 'r',encoding="utf-8-sig") as f:#去除開頭碼(\uxxxx
     for data in reader:
         data=[f"'{i}'" for i in data]#加上引號
         cur.execute(f'INSERT INTO content({",".join(columns)}) VALUES({",".join(data)})')
+        #可用executemany
 with open ('line and station.csv', 'r',encoding="utf-8-sig") as f:#去除開頭碼(\uxxxx)!
     reader = csv.reader(f)
     columns = next(reader)

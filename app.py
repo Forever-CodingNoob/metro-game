@@ -1,6 +1,6 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session
 import sqlite3
-from scripts import Station
+from scripts import Station,startGame
 import random
 import time
 import datetime
@@ -8,7 +8,6 @@ import datetime
 app=Flask(__name__)
 app.config['SECRET_KEY']="".join([chr(random.randint(21,126)) for i in range(10)])
 print(app.secret_key)
-app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=2)
 
 
 
@@ -22,7 +21,13 @@ def show_station(station,number):
 def just_show_station(station):
     return redirect(url_for('show_station',station=station,number=0))
 
-
+@app.route('/auth/login')
+def login():
+    return render_template("login.html")
+@app.route('/startgame/<int:players>')
+def startgame(players):
+    startGame(players)
+    return redirect(url_for('home'))
 
 
 # @app.route('/favicon.ico')
@@ -34,10 +39,14 @@ def home():
     return render_template('index.html')
 @app.route('/johnnysucks',methods=('POST',))
 def johnnysucks():
+    PRESS_TIME_DELTA=30
     if 'timestamp' in session:
         timedelta=time.time()-session['timestamp']
-        flash('林致中已經被電爆ㄌ，請再等%d秒' % int(120-timedelta))
-
+        if timedelta>=PRESS_TIME_DELTA:
+            flash('你又不費吹灰之力就電爆林致中ㄌ')
+            session['timestamp'] = time.time()
+        else:
+            flash('林致中已經被電爆ㄌ，請再等%d秒' % int(PRESS_TIME_DELTA-timedelta))
     else:
         flash('你不費吹灰之力就電爆林致中ㄌ')
         session['timestamp']=time.time()
