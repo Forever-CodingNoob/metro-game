@@ -1,6 +1,6 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session
 import sqlite3
-from scripts import Station,startGame
+from scripts import Station,startGame,Game
 import random
 import time
 import datetime
@@ -28,7 +28,17 @@ def login():
 def startgame(players):
     startGame(players)
     return redirect(url_for('home'))
-
+@app.route('/games/<string:gameid>')
+def showgame(gameid):
+    try:
+        game=Game(gameid)
+    except Game.GameNotFoundError as e:
+        print(str(e))
+        return redirect(url_for('showgames'))
+    return render_template('game.html',game=game)
+@app.route('/games')
+def showgames():
+    return redirect(url_for('home'))
 
 # @app.route('/favicon.ico')
 # def img():

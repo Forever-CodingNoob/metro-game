@@ -77,15 +77,20 @@
                     </form>
                 </li>
             </ul>
+
+
             <ul class="nav navbar-nav ml-auto">
+                {% if session['game'] %}
+                    <button class="btn btn-danger navbar-btn" onclick="location.href='{{ url_for('showgame',gameid=session['game']) }}';">GamePin:{{session['game']}}</button>
+                {% endif %}
                 <li>
-                    <a class="nav-link" href="{{url_for('login')}}">login</a>
+                    <a class="nav-link" href="{{url_for('login')}}">Login</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="#">register</a>
+                    <a class="nav-link" href="#">Register</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="#">give up playing</a>
+                    <a class="nav-link" href="#">Give Up Playing</a>
                 </li>
             </ul>
         </div>

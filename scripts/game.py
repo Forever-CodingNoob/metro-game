@@ -1,5 +1,5 @@
 from .db_conn import get_db_connection,STATIONOWNED_DB_NAME,GAMES_DB_NAME
-from .stations import Station
+import scripts.stations as stations
 from flask import session
 import random
 SYMBOLS=[chr(i) for i in range(48,58)]+[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
@@ -37,7 +37,8 @@ def startGame(players_amount):
                         );""")
     conn.commit()
     conn.close()
-
+def getCurrentGameId():
+    return "" if not session['game'] else session['game']
 
 class Game:
     class GameNotFoundError(Exception):
@@ -49,13 +50,13 @@ class Game:
         if game_info is None:#game not found
             raise Game.GameNotFoundError(f"game {gameid} not found")
         #self.info=dict(game_info)
-        self.gameid=gameid
+        self.gameid=game_info['id']
         self.created_timestamp=game_info['created_timestamp']
         self.started_timestamp=game_info['started_timestamp']
         self.status=game_info['status']
         self.players_amount=game_info['players_amount']
         self.players=Player.getAllplayers(gameid)
-        game_info_dict={'gameid':game_info['id']}
+        #game_info_dict={'gameid':game_info['id']}
 
 
 class Player:
@@ -79,7 +80,7 @@ class Player:
     def getCurrentOwnedStations(self):
         owned_stations=[]
         for station in self.getEverOwnedStations():
-            if Station.getOwnerID(station,self.gameid)==self.id:#statoin ower's id==player's id
+            if stations.Station.getOwnerID(station,self.gameid)==self.id:#statoin ower's id==player's id
                 owned_stations.append(station)
         print(f'player {self.name} owns {owned_stations}.')
         return owned_stations
