@@ -9,7 +9,7 @@ def get_db_connection(db_filename):
     # print(__file__.split(os.path.sep)) #split the path=>list
     # print(__file__.split(os.path.sep)[:-2]) #去掉最後2個子目錄
     # print(os.sep.join(__file__.split(os.sep)[:-2])) #list組回path
-    path=os.path.join(os.sep.join(__file__.split(os.sep)[:-2]),'data\\'+db_filename)#加上.splite3的路徑(\data\stations.sqlite)
+    path=os.path.join(os.sep.join(__file__.split(os.sep)[:-2]),'data'+os.sep+db_filename)#加上.splite3的路徑(\data\stations.sqlite)
     print('path=',path)
     conn=sqlite3.connect(path)
     conn.row_factory=sqlite3.Row
