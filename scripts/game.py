@@ -1,5 +1,5 @@
 from .db_conn import get_db_connection,STATIONOWNED_DB_NAME,GAMES_DB_NAME
-import scripts.stations as stations
+#import scripts.stations as stations     don't import it here, otherwise it will cause circular imports
 from flask import session
 import random
 SYMBOLS=[chr(i) for i in range(48,58)]+[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
@@ -93,6 +93,7 @@ class Player:
         conn.close()
         return [station[0] for station in stations]
     def getCurrentOwnedStations(self):
+        import scripts.stations as stations
         owned_stations=[]
         for station in self.getEverOwnedStations():
             if stations.Station.getOwnerID(station,self.gameid)==self.id:#statoin ower's id==player's id

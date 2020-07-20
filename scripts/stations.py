@@ -1,6 +1,6 @@
 import sqlite3
 from .db_conn import STATIONS_DB_NAME,get_db_connection,STATIONOWNED_DB_NAME
-import scripts.game as game
+#import scripts.game as game     don't import it here, otherwise it will cause circular imports
 class Tag:
     @classmethod
     def getTags(cls, station):
@@ -59,6 +59,7 @@ class Station(dict):
         self.number_of_problems= len(contents)
         super().__init__(problem)
         self.tags = Tag.getTags(self)
+        import scripts.game as game
         self.owner=game.Player(Station.getOwnerID(self.name,gameid)) if gameid else None
         print(self)
 
