@@ -24,7 +24,7 @@ def startGame(players_amount):
     conn.commit()
     conn.close()
 
-    #make brower remember the game
+    #make browser remember the game
     session['game']=gameid
 
     #log of owning station
@@ -57,8 +57,23 @@ class Game:
         self.players_amount=game_info['players_amount']
         self.players=Player.getAllplayers(gameid)
         #game_info_dict={'gameid':game_info['id']}
-
-
+    @staticmethod
+    def getAllGames():
+        conn=get_db_connection(GAMES_DB_NAME)
+        gameids=conn.execute('SELECT id FROM games ORDER BY created_timestamp DESC').fetchall()
+        conn.close()
+        return [Game(gameid[0]) for gameid in gameids]
+    @staticmethod
+    def join(gameid,name,password):
+        conn=get_db_connection(GAMES_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f'INSERT INTO players(name,gameid,password) VALUES("{name}","{gameid}","{password}")')
+        conn.commit()
+        conn.close()
+        # make browser remenber the player logged in
+        session['player_id']=Player.getOneplayer(gameid,name).id
+        # make browser remember the game
+        session['game'] = gameid
 class Player:
     class PlayerNotFoundError(Exception):
         pass

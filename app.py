@@ -21,9 +21,6 @@ def show_station(station,number):
 def just_show_station(station):
     return redirect(url_for('show_station',station=station,number=0))
 
-@app.route('/auth/login')
-def login():
-    return render_template("login.html")
 @app.route('/startgame/<int:players>')
 def startgame(players):
     startGame(players)
@@ -36,9 +33,25 @@ def showgame(gameid):
         print(str(e))
         return redirect(url_for('showgames'))
     return render_template('game.html',game=game)
+@app.route('/games/<string:gameid>/join')
+def joingame(gameid):
+    return render_template('login.html')
+@app.route('/games/<string:gameid>/join',methods=('POST',))
+def joingame_submit(gameid):
+    player_name=request.form['player_name']
+    if not player_name:
+        flash('還敢匿名加入遊戲啊?')
+        return render_template('login.html')
+    password=request.form['password']
+    if not password:
+        flash('還敢不設密碼啊?')
+        return render_template('login.html')
+    Game.join(gameid,player_name,password)
+    return redirect(url_for('home'))
 @app.route('/games')
 def showgames():
-    return redirect(url_for('home'))
+    games=Game.getAllGames()
+    return render_template('games.html',games=games)
 
 # @app.route('/favicon.ico')
 # def img():
