@@ -1,4 +1,4 @@
-import sqlite3,os,MySQLdb
+import sqlite3,os
 STATIONS_DB_NAME= 'Stations.sqlite'#題目db
 GAMES_DB_NAME= 'Games.sqlite'#每局資料db
 STATIONOWNED_DB_NAME= 'StationsOwned.sqlite'#每局佔領概況db
