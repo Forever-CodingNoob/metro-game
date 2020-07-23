@@ -36,7 +36,11 @@ class Line:
     @staticmethod
     def toEN(line_name_zh):
         conn=get_db_connection(STATIONS_DB_NAME)
-        ENname=conn.execute(f"SELECT lineEN FROM line_name WHERE lineZH='{line_name_zh}'").fetchone()['lineEN']
+        cur=conn.cursor()
+        cur.execute(f"SELECT lineEN FROM line_name WHERE lineZH='{line_name_zh}'")
+        ENname=cur.fetchone()['lineen']
+        #show weird keys=>print([i for i in a.keys()])
+        #ENname=cur.fetchone()['lineEN']
         return ENname
     @classmethod
     def getLine(cls,lineList):
@@ -46,7 +50,9 @@ class Line:
 class Station(dict):
     def __init__(self,station,problem_number,*,gameid=None):
         conn = get_db_connection(STATIONS_DB_NAME)
-        contents = conn.execute(f'SELECT * FROM content_sorted WHERE station="{station}"').fetchall()
+        cur=conn.cursor()
+        cur.execute(f"SELECT * FROM content_sorted WHERE station='{station}'")
+        contents = cur.fetchall()
         conn.close()
         print(contents)
         # problems=[{'type':content['type'],'exit':content['exit'],'content':content['content'],'answer':content['answer']} for content in contents]
@@ -66,7 +72,9 @@ class Station(dict):
     @staticmethod
     def getOwnerID(station_name,gameid):
         conn=get_db_connection(STATIONOWNED_DB_NAME)
-        ownerid=conn.execute(f"SELECT owner FROM {gameid} WHERE station={station_name} ORDER BY id DESC LIMIT 1").fetchone()[0]
+        cur=conn.cursor()
+        cur.execute(f"SELECT owner FROM {gameid} WHERE station='{station_name}' ORDER BY id DESC LIMIT 1")
+        ownerid=cur.fetchone()[0]
         conn.close()
         return ownerid
 

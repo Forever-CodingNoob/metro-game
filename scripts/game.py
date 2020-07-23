@@ -12,7 +12,9 @@ def startGame(players_amount):
     #summon random and distinct gameid
     while True:
         gameid=getRandSymbol(6)#溢位?
-        if conn.execute(f'SELECT * FROM games WHERE id="{gameid}"').fetchall():
+        cur=conn.cursor()
+        cur.execute(f"SELECT * FROM games WHERE id='{gameid}'")
+        if cur.fetchall():
             print("summoned the existing gameid. try making a new one....")
             continue
         break
@@ -20,21 +22,23 @@ def startGame(players_amount):
 
     #add a new game to sqlite
     cur=conn.cursor()
-    cur.execute(f'INSERT INTO games(id,status,players_amount) VALUES("{gameid}","starting",{players_amount})')
+    cur.execute(f"INSERT INTO games(id,status,players_amount) VALUES('{gameid}','starting',{players_amount})")
     conn.commit()
     conn.close()
 
     #make browser remember the game
     session['game']=gameid
-
+    #make browser forget previous player logged in
+    session.pop('player_id',None)
     #log of owning station
     conn=get_db_connection(STATIONOWNED_DB_NAME)
-    conn.executescript(f"""CREATE TABLE {gameid}(
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        station TEXT,
-                        owner TEXT
-                        );""")
+    cur=conn.cursor()
+    cur.execute(f"""CREATE TABLE {gameid}(
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                station TEXT,
+                owner TEXT
+                );""")
     conn.commit()
     conn.close()
 def getCurrentGameId():
@@ -45,7 +49,9 @@ class Game:
         pass
     def __init__(self,gameid):
         conn=get_db_connection(GAMES_DB_NAME)
-        game_info=conn.execute(f'SELECT * FROM games WHERE id="{gameid}"').fetchone()
+        cur=conn.cursor()
+        cur.execute(f"SELECT * FROM games WHERE id='{gameid}'")
+        game_info=cur.fetchone()
         conn.close()
         if game_info is None:#game not found
             raise Game.GameNotFoundError(f"game {gameid} not found")
@@ -55,19 +61,21 @@ class Game:
         self.started_timestamp=game_info['started_timestamp']
         self.status=game_info['status']
         self.players_amount=game_info['players_amount']
-        self.players=Player.getAllplayers(gameid)
+        #too slow=>self.players=Player.getAllplayers(gameid)
         #game_info_dict={'gameid':game_info['id']}
     @staticmethod
     def getAllGames():
         conn=get_db_connection(GAMES_DB_NAME)
-        gameids=conn.execute('SELECT id FROM games ORDER BY created_timestamp DESC').fetchall()
+        cur=conn.cursor()
+        cur.execute('SELECT id FROM games ORDER BY created_timestamp DESC')
+        gameids=cur.fetchall()
         conn.close()
         return [Game(gameid[0]) for gameid in gameids]
     @staticmethod
     def join(gameid,name,password):
         conn=get_db_connection(GAMES_DB_NAME)
         cur=conn.cursor()
-        cur.execute(f'INSERT INTO players(name,gameid,password) VALUES("{name}","{gameid}","{password}")')
+        cur.execute(f"INSERT INTO players(name,gameid,password) VALUES('{name}','{gameid}','{password}')")
         conn.commit()
         conn.close()
         # make browser remenber the player logged in
@@ -79,7 +87,9 @@ class Player:
         pass
     def __init__(self,id):
         conn=get_db_connection(GAMES_DB_NAME)
-        player=conn.execute(f'SELECT * FROM players WHERE id="{id}"').fetchone()
+        cur=conn.cursor()
+        cur.execute(f"SELECT * FROM players WHERE id='{id}'")
+        player=cur.fetchone()
         conn.close()
         if player is None:
             raise  Player.PlayerNotFoundError(f"player with id {id} not found.")
@@ -89,7 +99,9 @@ class Player:
         self.id=player['id']
     def getEverOwnedStations(self):
         conn=get_db_connection(STATIONOWNED_DB_NAME)
-        stations=conn.execute(f'SELECT station FROM {self.gameid} WHERE owner={self.id}').fetchall()
+        cur=conn.cursor()
+        cur.execute(f'SELECT station FROM {self.gameid} WHERE owner={self.id}')
+        stations=cur.fetchall()
         conn.close()
         return [station[0] for station in stations]
     def getCurrentOwnedStations(self):
@@ -105,15 +117,27 @@ class Player:
     @staticmethod
     def getAllplayers(gameid):
         conn=get_db_connection(GAMES_DB_NAME)
-        playerids=conn.execute(f'SELECT id FROM players WHERE gameid="{gameid}"').fetchall()
+        cur=conn.cursor()
+        cur.execute(f"SELECT id FROM players WHERE gameid='{gameid}'")
+        playerids=cur.fetchall()
         conn.close()
         return [Player(playerid[0]) for playerid in playerids]
     @staticmethod
-    def getOneplayer(gameid,name):
+    def getOneplayer_slow(gameid,name):
         players=Player.getAllplayers(gameid)
         player=[player for player in players if player.name==name]
         if player:
             return player[0]#return the only player in the game that matches the givin name
+        raise Player.PlayerNotFoundError(f'player with name {name} not found.')
+
+    @staticmethod
+    def getOneplayer(gameid, name):
+        conn=get_db_connection(GAMES_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"SELECT id FROM players WHERE gameid='{gameid}' AND name='{name}'")
+        player=cur.fetchone()
+        if player:
+            return Player(player[0])  # return the only player in the game that matches the givin name
         raise Player.PlayerNotFoundError(f'player with name {name} not found.')
 
 
