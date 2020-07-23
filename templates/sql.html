@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %} Postgresql {% endblock %}
+{% block content %}
+    <div class="title-form">Postgresql</div>
+    <h5>
+        available commands:
+        <ul>
+            <li>SELECT</li>
+        </ul>
+    </h5>
+    <form method="post">
+        <div class="form-group">
+            <label for="sql-log">Logs</label>
+            <textarea readonly name="sql-log" id="sql-log" rows=3 cols=50 class="form-control">{{logs}}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="db">Choose a Postgresql Database to execute commands:</label><br>
+            <select id="db" name="db">
+                <option value="{{db_names.STATIONS_DB_NAME}}">Stations Info</option>
+                <option value="{{db_names.GAMES_DB_NAME}}">Games</option>
+                <option value="{{db_names.STATIONOWNED_DB_NAME}}">Stations Owned</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="sql">Postgresql Query Editor</label>
+            <textarea name="sql" id="sql" rows=3 cols=50 class="form-control">{{request.form['sql']}}</textarea>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Execute</button>
+        </div>
+    </form>
+{% endblock %}

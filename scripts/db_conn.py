@@ -3,6 +3,11 @@ import psycopg2,psycopg2.extras
 STATIONS_DB_NAME= 'STATIONS_INFO_DB'#題目db
 GAMES_DB_NAME= 'GAMES_DB'#每局資料db
 STATIONOWNED_DB_NAME= 'STATIONS_OWNED_DB'#每局佔領概況db
+class DB_NAMES:
+    STATIONS_DB_NAME = 'STATIONS_INFO_DB'  # 題目db
+    GAMES_DB_NAME = 'GAMES_DB'  # 每局資料db
+    STATIONOWNED_DB_NAME = 'STATIONS_OWNED_DB'  # 每局佔領概況db
+
 SQLITE_NAME={'STATIONS_INFO_DB':'Stations.sqlite','GAMES_DB':'Games.sqlite','STATIONS_OWNED_DB':'StationsOwned.sqlite'}
 APP_NAME="metro-game"
 
@@ -14,7 +19,18 @@ HEROKU_DB_URL={'STATIONS_INFO_DB':None,'GAMES_DB':None,'STATIONS_OWNED_DB':None}
 def config_db_url(app):
     #app.config['HEROKU_DB_URL']=HEROKU_DB_URL
     pass
+def executeSQL_fetchall(sql,db_filename):
+    conn=get_db_connection(db_filename)
+    cur=conn.cursor()
+    try:
+        cur.execute(sql)
+        results=cur.fetchall()
+    except Exception as e:
+        results=str(e)
+    cur.close()
+    conn.close()
 
+    return results
 
 #local sqlite files connection
 def get_local_sqlite_db_connection(db_filename):
