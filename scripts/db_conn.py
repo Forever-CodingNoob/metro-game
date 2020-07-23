@@ -32,18 +32,20 @@ def get_db_connection(db_filename):
     if HEROKU_DB_URL[db_filename]:
         print('find stored db url!!!')
         db_url = HEROKU_DB_URL[db_filename]
-        print('db_url:', repr(db_url))
     else:
         print('no db url stored, getting a new one...')
+        print(f'heroku config:get {db_filename} --app {APP_NAME}')
         #get db congif name takes much time
         db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1] #去掉換行符號\n
         print('db_config_name:',repr(db_config_name))
 
         db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1] #去掉換行符號\n
-        print('db_url:',repr(db_url))
 
         HEROKU_DB_URL[db_filename]=db_url#save db url
 
+    #db的url中已經有host,port,password,user,database等資訊，只要把整坨放入connect()中它就會知道了
+    #當然亦可把資料拆開，再以parameter的形式丟進去(但這裡採用整坨放)
+    print('db_url:',repr(db_url))
     conn = psycopg2.connect(db_url, sslmode='require',cursor_factory=psycopg2.extras.DictCursor)
     cur=conn.cursor()
     cur.execute("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
