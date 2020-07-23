@@ -1,12 +1,13 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session
 import sqlite3
-from scripts import Station,startGame,Game
+from scripts import Station,startGame,Game,config_db_url
 import random
 import time
 import datetime
 
 app=Flask(__name__)
 app.config['SECRET_KEY']="".join([chr(random.randint(21,126)) for i in range(10)])
+config_db_url(app)
 print(app.secret_key)
 
 

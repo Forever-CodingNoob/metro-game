@@ -11,6 +11,11 @@ APP_NAME="metro-game"
 HEROKU_DB_URL={'STATIONS_INFO_DB':None,'GAMES_DB':None,'STATIONS_OWNED_DB':None}
 
 
+def config_db_url(app):
+    #app.config['HEROKU_DB_URL']=HEROKU_DB_URL
+    pass
+
+
 #local sqlite files connection
 def get_local_sqlite_db_connection(db_filename):
     # print(__file__) #此.py檔絕對路徑
@@ -34,12 +39,20 @@ def get_db_connection(db_filename):
         db_url = HEROKU_DB_URL[db_filename]
     else:
         print('no db url stored, getting a new one...')
-        print(f'heroku config:get {db_filename} --app {APP_NAME}')
-        #get db congif name takes much time
-        db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1] #去掉換行符號\n
-        print('db_config_name:',repr(db_config_name))
+        try:#running on heroku
+            db_config_name = os.environ[db_filename]
+            print('running on heroku...')
+            print('db_config_name:', repr(db_config_name))
 
-        db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1] #去掉換行符號\n
+            db_url = os.environ[db_config_name]
+        except:#running on windows
+            print('running on local...')
+            print(f'heroku config:get {db_filename} --app {APP_NAME}')
+            #get db congif name takes much time
+            db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1] #去掉換行符號\n
+            print('db_config_name:',repr(db_config_name))
+
+            db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1] #去掉換行符號\n
 
         HEROKU_DB_URL[db_filename]=db_url#save db url
 
