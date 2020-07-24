@@ -12,14 +12,23 @@
         {% endfor %}
     </div>
     <div class="tags">
-            <!--<span class="badge badge-primary">等級:{{ station.grade }}</span>
-            <span class="badge badge-warning">出口:{{ station['exit'] }}</span>
-            <span class="badge badge-warning">類別:{{ station['type'] }}</span>-->
-            {% for tag in station.tags %}
-                <span class="{{tag['class']}}">{{tag['text']}}</span>
-            {% endfor %}
+        <!--<span class="badge badge-primary">等級:{{ station.grade }}</span>
+        <span class="badge badge-warning">出口:{{ station['exit'] }}</span>
+        <span class="badge badge-warning">類別:{{ station['type'] }}</span>-->
+        {% for tag in station.tags %}
+            <span class="{{tag['class']}}">{{tag['text']}}</span>
+        {% endfor %}
     </div>
-    <hr><br>
+    <div class="arrows">
+        {# station['number']是0base #}
+        {% if station['number'] < station.number_of_problems-1 %}
+            <a href="{{url_for('show_station',station=station.name,number=station['number']+1)}}"><span class="badge badge-dark">--></span></a>
+        {% endif %}
+        {% if station['number'] > 0 %}
+            <a href="{{url_for('show_station',station=station.name,number=station['number']-1)}}"><span class="badge badge-dark"><--</span></a>
+        {% endif %}
+    </div>
+    <hr>
     <div class="text">
         <p>{{ station['content'] }}</p>
     </div>

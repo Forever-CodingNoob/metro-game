@@ -20,7 +20,7 @@ def config_db_url(app):
     #app.config['HEROKU_DB_URL']=HEROKU_DB_URL
     pass
 def executeSQL_fetchall(sql,db_filename):
-    conn=get_db_connection(db_filename)
+    conn=get_db_connection(db_filename,cursor_factory=psycopg2.extras.RealDictCursor)
     cur=conn.cursor()
     try:
         cur.execute(sql)
@@ -48,7 +48,7 @@ def get_local_sqlite_db_connection(db_filename):
     print(f'tables in {db_filename}:',[i[0] for i in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()])
     return conn
 #remote heroku postgresql connection
-def get_db_connection(db_filename):
+def get_db_connection(db_filename,cursor_factory=psycopg2.extras.DictCursor):
     print(f"getting heroku postgresql conn for {db_filename}....")
     if HEROKU_DB_URL[db_filename]:
         print('find stored db url!!!')
@@ -75,13 +75,13 @@ def get_db_connection(db_filename):
     #db的url中已經有host,port,password,user,database等資訊，只要把整坨放入connect()中它就會知道了
     #當然亦可把資料拆開，再以parameter的形式丟進去(但這裡採用整坨放)
     print('db_url:',repr(db_url))
-    conn = psycopg2.connect(db_url, sslmode='require',cursor_factory=psycopg2.extras.DictCursor)
+    conn = psycopg2.connect(db_url, sslmode='require',cursor_factory=cursor_factory)
     cur=conn.cursor()
     cur.execute("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
     # type(conn)==psycopg2.extensions.connection
     # type(cur) ==psycopg2.extras.DictCursor
     # type(Row) ==psycopg2.extras.DictRow
-    print(f'tables in {db_filename}:',[i[0] for i in cur.fetchall()])
+    print(f'tables in {db_filename}:',[i['tablename'] for i in cur.fetchall()])
     cur.close()
     return conn
 # conn=get_db_connection(STATIONS_DB_NAME)

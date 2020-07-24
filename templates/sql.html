@@ -30,4 +30,7 @@
             <button type="submit" class="btn btn-success">Execute</button>
         </div>
     </form>
+    {% if auth!='admin' %}
+        <a href="{{url_for('auth')}}"><button>auth</button></a>
+    {% endif %}
 {% endblock %}
