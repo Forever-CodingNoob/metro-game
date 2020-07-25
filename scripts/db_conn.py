@@ -1,4 +1,4 @@
-import sqlite3,os
+import sqlite3,os,subprocess
 import psycopg2,psycopg2.extras
 STATIONS_DB_NAME= 'STATIONS_INFO_DB'#題目db
 GAMES_DB_NAME= 'GAMES_DB'#每局資料db
@@ -19,6 +19,8 @@ HEROKU_DB_URL={'STATIONS_INFO_DB':None,'GAMES_DB':None,'STATIONS_OWNED_DB':None}
 def config_db_url(app):
     #app.config['HEROKU_DB_URL']=HEROKU_DB_URL
     pass
+
+#execute postgresql command using psycopg2
 def executeSQL_fetchall(sql,db_filename):
     conn=get_db_connection(db_filename,cursor_factory=psycopg2.extras.RealDictCursor)
     cur=conn.cursor()
@@ -27,10 +29,50 @@ def executeSQL_fetchall(sql,db_filename):
         results=cur.fetchall()
     except Exception as e:
         results=str(e)
-    cur.close()
-    conn.close()
+    finally:
+        cur.close()
+        conn.close()
 
     return results
+
+#execute postgresql in terminal
+def executeSQL_terminal_inhtml(sql,db_filename):
+    db_url=getDBurl(db_filename)
+    try:
+        #利用terminal=>subprocess.Popen，用communicate() output
+        process=subprocess.Popen(f'psql --command "{sql}" --html {db_url}',stdout=subprocess.PIPE,encoding='utf-8')
+        results,error=process.communicate()
+        print('results:',repr(results))
+    except Exception as e:
+        results=f"{e.__class__}:{e}"
+    return results
+
+
+def getDBurl(db_filename):
+    #get db url=>windows:heroku cli in terminal, heroku:env variables
+    try:  # running on heroku
+        db_config_name = os.environ[db_filename]
+        print('running on heroku...')
+        print('db_config_name:', repr(db_config_name))
+
+        db_url = os.environ[db_config_name]
+    except KeyError:  # running on windows
+        print('running on local...')
+        print(f'heroku config:get {db_filename} --app {APP_NAME}')
+        # get db congif name takes much time
+        db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1]  # 去掉換行符號\n
+        print('db_config_name:', repr(db_config_name))
+
+        db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1]  # 去掉換行符號\n
+    except Exception as e:
+        raise OSError("cannot get database's url from system.")
+
+    return db_url
+
+
+
+
+
 
 #local sqlite files connection
 def get_local_sqlite_db_connection(db_filename):
@@ -48,6 +90,8 @@ def get_local_sqlite_db_connection(db_filename):
     print(f'tables in {db_filename}:',[i[0] for i in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()])
     return conn
 #remote heroku postgresql connection
+# manipulation db using psycopg2
+# (db_url needed, get it from either environment variables(heroku) or heroku cli(windows))
 def get_db_connection(db_filename,cursor_factory=psycopg2.extras.DictCursor):
     print(f"getting heroku postgresql conn for {db_filename}....")
     if HEROKU_DB_URL[db_filename]:
@@ -55,21 +99,7 @@ def get_db_connection(db_filename,cursor_factory=psycopg2.extras.DictCursor):
         db_url = HEROKU_DB_URL[db_filename]
     else:
         print('no db url stored, getting a new one...')
-        try:#running on heroku
-            db_config_name = os.environ[db_filename]
-            print('running on heroku...')
-            print('db_config_name:', repr(db_config_name))
-
-            db_url = os.environ[db_config_name]
-        except:#running on windows
-            print('running on local...')
-            print(f'heroku config:get {db_filename} --app {APP_NAME}')
-            #get db congif name takes much time
-            db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1] #去掉換行符號\n
-            print('db_config_name:',repr(db_config_name))
-
-            db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1] #去掉換行符號\n
-
+        db_url=getDBurl(db_filename)
         HEROKU_DB_URL[db_filename]=db_url#save db url
 
     #db的url中已經有host,port,password,user,database等資訊，只要把整坨放入connect()中它就會知道了

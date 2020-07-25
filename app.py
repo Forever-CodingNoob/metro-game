@@ -1,6 +1,6 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session,abort
 import sqlite3
-from scripts import Station,startGame,Game,config_db_url,STATIONS_DB_NAME,GAMES_DB_NAME,STATIONOWNED_DB_NAME,DB_NAMES,executeSQL_fetchall
+from scripts import Station,startGame,Game,config_db_url,STATIONS_DB_NAME,GAMES_DB_NAME,STATIONOWNED_DB_NAME,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml
 import random
 import time
 import datetime
@@ -81,24 +81,35 @@ def johnnysucks():
     return redirect(request.headers.get("Referer"))
 @app.route('/sql')
 def sql_query_editor():
-    return render_template('sql.html',logs='',db_names=DB_NAMES,auth=session.get('auth'))
+    return render_template('sql.html',logs='',output_in_html='',db_names=DB_NAMES,auth=session.get('auth'))
 @app.route('/sql',methods=('POST',))
 def sql_query_execute():
     sql=request.form['sql']
-    db_filename=request.form['db']
+    db_filename = request.form['db']
+    prettyprint = bool(request.form.get('pretty-output'))
+    output_in_html = ''  # 額外顯示html版的output
+    if not sql:
+        flash('打些東東ㄅ')
+        return render_template('sql.html', output_in_html='', db_names=DB_NAMES,
+                               auth=session.get('auth'))
+
+
     command=sql.split()[0].upper()
     ALLOWED_COMMAND=['SELECT']
-    print('sql:',sql,',','db_filename:',db_filename,',','command:',command)
+    print('sql:',repr(sql),',','db_filename:',db_filename,',','command:',command,',','pretty-print:',prettyprint)
     if command in ALLOWED_COMMAND:
-        if sql.lower().find(command.lower())!=-1:
-            print(f'find command {command}!!!')
+        print(f'find command {command}!!!')
+        if not prettyprint:
             results = executeSQL_fetchall(sql, db_filename)
             if type(results) is list:
                 results='[\t'+",\n\t".join([str(dict(row)) for row in results])+'\t]'
+        else:
+            results = executeSQL_terminal_inhtml(sql,db_filename)
+            output_in_html = results
     else:
         results=f'COMMAND "{command}" IS NOT ALLOED OR INVALID'
     logs=request.form['sql-log']+'\n\n('+db_filename+')>>'+sql+'\noutput:\n'+results
-    return render_template('sql.html',logs=logs,db_names=DB_NAMES,auth=session.get('auth'))
+    return render_template('sql.html',logs=logs,output_in_html=output_in_html,db_names=DB_NAMES,auth=session.get('auth'))
 @app.route('/auth',methods=('POST','GET'))
 def auth():
     if request.method=='POST':#POST

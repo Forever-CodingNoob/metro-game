@@ -3,17 +3,33 @@
 {% block title %} Postgresql {% endblock %}
 {% block content %}
     <div class="title-form">Postgresql</div>
-    <h5>
-        available commands:
-        <ul>
-            <li>SELECT</li>
-        </ul>
-    </h5>
-    <form method="post">
+    <div>
+        <h5>
+            available commands:
+            <ul>
+                <li>SELECT</li>
+            </ul>
+            hints:
+            <ul>
+                <li>可以一次執行多行</li>
+                <li>只會輸出最後一次SELECT(如果有多次SELECT)</li>
+                <li>我沒排版qwq</li>
+            </ul>
+        </h5>
+    </div>
+    <hr>
+    <form method="post" class="form-sql">
         <div class="form-group">
-            <label for="sql-log">Logs</label>
-            <textarea readonly name="sql-log" id="sql-log" rows=3 cols=50 class="form-control">{{logs}}</textarea>
+            <label for="sql-log">Logs</label><button type="button" onclick="javascript:eraseText();">Clear Log</button>
+            <textarea readonly name="sql-log" id="sql-log" rows=3 cols=50 class="form-control">{{logs or request.form['sql-log']}}</textarea>
         </div>
+        {% if output_in_html %}
+        <div class="form-group">
+            <label for="like-textarea">Logs but prettier</label>
+            <div id="like-textarea" class="form-control">{{output_in_html|safe}}</div>
+        </div>
+        {% endif %}
+        <hr>
         <div class="form-group">
             <label for="db">Choose a Postgresql Database to execute commands:</label><br>
             <select id="db" name="db">
@@ -27,10 +43,21 @@
             <textarea name="sql" id="sql" rows=3 cols=50 class="form-control">{{request.form['sql']}}</textarea>
         </div>
         <div class="form-group">
+            <input type="checkbox" name="pretty-output" id="pretty-output" value="html">
+            <label for="pretty-output">enable prettry output</label>
+        </div>
+        <div class="form-group">
             <button type="submit" class="btn btn-success">Execute</button>
         </div>
     </form>
     {% if auth!='admin' %}
         <a href="{{url_for('auth')}}"><button>auth</button></a>
     {% endif %}
+
+
+    <script>
+        function eraseText(){
+            document.getElementById("sql-log").value = "";
+        }
+    </script>
 {% endblock %}
