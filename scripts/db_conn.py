@@ -40,11 +40,13 @@ def executeSQL_terminal_inhtml(sql,db_filename):
     db_url=getDBurl(db_filename)
     try:
         #利用terminal=>subprocess.Popen，用communicate() output
-        process=subprocess.Popen(f'psql --command "{sql}" --html {db_url}',stdout=subprocess.PIPE,encoding='utf-8')
-        results,error=process.communicate()
-        print('results:',repr(results))
-    except Exception as e:
+        process=subprocess.Popen(f'psql --command "{sql}" --html {db_url}',stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding='utf-8',shell=True)
+        output,error=process.communicate()#成功執行時在output輸出，反則在error輸出錯誤資訊
+        print('output:',repr(output),',','error:',repr(error))
+        results=output if not error else error
+    except Exception as e:#若上方python語句執行有問題會到這，但若是sql指令有問題(termial中的問題)並不會報錯，而是輸出在stderr
         results=f"{e.__class__}:{e}"
+    print('results:', repr(results))
     return results
 
 
