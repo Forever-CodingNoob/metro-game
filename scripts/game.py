@@ -5,7 +5,7 @@ import random
 SYMBOLS=[chr(i) for i in range(48,58)]+[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
 def getRandSymbol(length):
     return "".join([random.choice(SYMBOLS) for i in range(length)])
-def startGame(gamename,players_amount):
+def startGame(players_amount,gamename=''):
     conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
     print('a new game created.')
 
@@ -22,7 +22,7 @@ def startGame(gamename,players_amount):
 
     #add a new game to sqlite
     cur=conn.cursor()
-    cur.execute(f"INSERT INTO games(id,status,players_amount) VALUES('{gameid}','starting',{players_amount})")
+    cur.execute(f"INSERT INTO games(id,status,players_amount,name) VALUES('{gameid}','starting',{players_amount},'{gamename}')")
     conn.commit()
     conn.close()
 
@@ -59,7 +59,7 @@ class Game:
         self.gameid=game_info['id']
         self.created_timestamp=game_info['created_timestamp']
         self.started_timestamp=game_info['started_timestamp']
-        self.name=game_info['name']
+        self.name=game_info['name'] if game_info['name'] is not None else ''
         self.status=game_info['status']
         self.players_amount=game_info['players_amount']
         #too slow=>self.players=Player.getAllplayers(gameid)

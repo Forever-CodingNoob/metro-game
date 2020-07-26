@@ -2,9 +2,13 @@
 
 {% block title %} Games {% endblock %}
 {% block content %}
+    <div class="startgame">
+        <a href="{{url_for('startgame')}}"><button class="btn btn-success">創建新的一局</button></a>
+    </div>
     {% for game in games %}
-        <div>
-            <h2>{{game.gameid}}</h2>
+        <div class="game-info">
+            <div id="gameid"><h2>{{game.gameid}}</h2></div>
+            <div id="gamename"><h3>{{game.name}}</h3></div>
             <span class="badge badge-primary">created time:{{game.created_timestamp}}</span>
             <span><a href="{{ url_for('showgame', gameid=game.gameid) }}">view game</a></span>
             <span><a href="{{url_for('joingame', gameid=game.gameid)}}">join game</a></span>

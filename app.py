@@ -32,7 +32,7 @@ def startgame():
     else:#POST
         player_amount=int(request.form['player_amount_limit'])
         gamename=request.form['game_name']
-        startGame(gamename,player_amount)
+        startGame(players_amount=player_amount,gamename=gamename)
         return redirect(url_for('home'))
 @app.route('/games/<string:gameid>')
 def showgame(gameid):
