@@ -1,6 +1,6 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session,abort
 import sqlite3
-from scripts import Station,startGame,Game,config_db_url,STATIONS_DB_NAME,GAMES_DB_NAME,STATIONOWNED_DB_NAME,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml
+from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml
 import random
 import time
 import datetime
@@ -25,10 +25,15 @@ def show_station(station):
 def just_show_station(station):
     return redirect(url_for('show_station',station=station,number=0))
 
-@app.route('/startgame/<int:players>')
-def startgame(players):
-    startGame(players)
-    return redirect(url_for('home'))
+@app.route('/startgame',methods=('POST','GET'))
+def startgame():
+    if request.method=='GET':#GET
+        return render_template('create.html')
+    else:#POST
+        player_amount=int(request.form['player_amount_limit'])
+        gamename=request.form['game_name']
+        startGame(gamename,player_amount)
+        return redirect(url_for('home'))
 @app.route('/games/<string:gameid>')
 def showgame(gameid):
     try:
@@ -94,11 +99,11 @@ def sql_query_execute():
                                auth=session.get('auth'))
 
 
-    command=sql.split()[0].upper()
-    ALLOWED_COMMAND=['SELECT']
-    print('sql:',repr(sql),',','db_filename:',db_filename,',','command:',command,',','pretty-print:',prettyprint)
-    if command in ALLOWED_COMMAND:
-        print(f'find command {command}!!!')
+    commands=[command.split()[0].upper() for command in sql.split(';')]
+    ALLOWED_COMMANDS={'SELECT'}
+    print('sql:',repr(sql),',','db_filename:',db_filename,',','commands:',commands,',','pretty-print:',prettyprint)
+    if [command for command in commands if command not in ALLOWED_COMMANDS]==[] or session.get('auth')=='admin':
+        print(f'find command {commands}!!!')
         if not prettyprint:
             results = executeSQL_fetchall(sql, db_filename)
             if type(results) is list:
@@ -106,8 +111,8 @@ def sql_query_execute():
         else:
             results = executeSQL_terminal_inhtml(sql,db_filename)
             output_in_html = results
-    else:
-        results=f'COMMAND "{command}" IS NOT ALLOED OR INVALID'
+    else:#there is a prohibited command in sql commands
+        results=f'COMMAND {[command for command in commands if command not in ALLOWED_COMMANDS]} IS NOT ALLOWED OR INVALID'
     logs=request.form['sql-log']+'\n\n('+db_filename+')>>'+sql+'\noutput:\n'+results
     return render_template('sql.html',logs=logs,output_in_html=output_in_html,db_names=DB_NAMES,auth=session.get('auth'))
 @app.route('/auth',methods=('POST','GET'))

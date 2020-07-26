@@ -4,6 +4,7 @@ CREATE TABLE games(
 	id TEXT PRIMARY KEY,
 	created_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	started_timestamp TIMESTAMP,
+	name TEXT,
 	status TEXT,
 	players_amount INTEGER
 

@@ -1,5 +1,5 @@
 import sqlite3
-from .db_conn import STATIONS_DB_NAME,get_db_connection,STATIONOWNED_DB_NAME
+from .db_conn import get_db_connection,DB_NAMES
 #import scripts.game as game     don't import it here, otherwise it will cause circular imports
 class Tag:
     @classmethod
@@ -35,7 +35,7 @@ class Tag:
 class Line:
     @staticmethod
     def toEN(line_name_zh):
-        conn=get_db_connection(STATIONS_DB_NAME)
+        conn=get_db_connection(DB_NAMES.STATIONS_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT lineEN FROM line_name WHERE lineZH='{line_name_zh}'")
         ENname=cur.fetchone()['lineen']
@@ -49,7 +49,7 @@ class Line:
 
 class Station(dict):
     def __init__(self,station,problem_number,*,gameid=None):
-        conn = get_db_connection(STATIONS_DB_NAME)
+        conn = get_db_connection(DB_NAMES.STATIONS_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT * FROM content_sorted WHERE station='{station}'")
         contents = cur.fetchall()
@@ -71,7 +71,7 @@ class Station(dict):
 
     @staticmethod
     def getOwnerID(station_name,gameid):
-        conn=get_db_connection(STATIONOWNED_DB_NAME)
+        conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT owner FROM {gameid} WHERE station='{station_name}' ORDER BY id DESC LIMIT 1")
         ownerid=cur.fetchone()[0]

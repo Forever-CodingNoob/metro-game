@@ -1,12 +1,12 @@
-from .db_conn import get_db_connection,STATIONOWNED_DB_NAME,GAMES_DB_NAME
+from .db_conn import get_db_connection,DB_NAMES
 #import scripts.stations as stations     don't import it here, otherwise it will cause circular imports
 from flask import session
 import random
 SYMBOLS=[chr(i) for i in range(48,58)]+[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
 def getRandSymbol(length):
     return "".join([random.choice(SYMBOLS) for i in range(length)])
-def startGame(players_amount):
-    conn = get_db_connection(GAMES_DB_NAME)
+def startGame(gamename,players_amount):
+    conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
     print('a new game created.')
 
     #summon random and distinct gameid
@@ -31,7 +31,7 @@ def startGame(players_amount):
     #make browser forget previous player logged in
     session.pop('player_id',None)
     #log of owning station
-    conn=get_db_connection(STATIONOWNED_DB_NAME)
+    conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
     cur=conn.cursor()
     cur.execute(f"""CREATE TABLE {gameid}(
                 id SERIAL PRIMARY KEY,
@@ -48,7 +48,7 @@ class Game:
     class GameNotFoundError(Exception):
         pass
     def __init__(self,gameid):
-        conn=get_db_connection(GAMES_DB_NAME)
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT * FROM games WHERE id='{gameid}'")
         game_info=cur.fetchone()
@@ -59,13 +59,14 @@ class Game:
         self.gameid=game_info['id']
         self.created_timestamp=game_info['created_timestamp']
         self.started_timestamp=game_info['started_timestamp']
+        self.name=game_info['name']
         self.status=game_info['status']
         self.players_amount=game_info['players_amount']
         #too slow=>self.players=Player.getAllplayers(gameid)
         #game_info_dict={'gameid':game_info['id']}
     @staticmethod
     def getAllGames():
-        conn=get_db_connection(GAMES_DB_NAME)
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute('SELECT id FROM games ORDER BY created_timestamp DESC')
         gameids=cur.fetchall()
@@ -73,7 +74,7 @@ class Game:
         return [Game(gameid[0]) for gameid in gameids]
     @staticmethod
     def join(gameid,name,password):
-        conn=get_db_connection(GAMES_DB_NAME)
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"INSERT INTO players(name,gameid,password) VALUES('{name}','{gameid}','{password}')")
         conn.commit()
@@ -86,7 +87,7 @@ class Player:
     class PlayerNotFoundError(Exception):
         pass
     def __init__(self,id):
-        conn=get_db_connection(GAMES_DB_NAME)
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT * FROM players WHERE id='{id}'")
         player=cur.fetchone()
@@ -98,7 +99,7 @@ class Player:
         self.gameid=player['gameid']
         self.id=player['id']
     def getEverOwnedStations(self):
-        conn=get_db_connection(STATIONOWNED_DB_NAME)
+        conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         cur=conn.cursor()
         cur.execute(f'SELECT station FROM {self.gameid} WHERE owner={self.id}')
         stations=cur.fetchall()
@@ -116,7 +117,7 @@ class Player:
 
     @staticmethod
     def getAllplayers(gameid):
-        conn=get_db_connection(GAMES_DB_NAME)
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT id FROM players WHERE gameid='{gameid}'")
         playerids=cur.fetchall()
@@ -132,7 +133,7 @@ class Player:
 
     @staticmethod
     def getOneplayer(gameid, name):
-        conn=get_db_connection(GAMES_DB_NAME)
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute(f"SELECT id FROM players WHERE gameid='{gameid}' AND name='{name}'")
         player=cur.fetchone()

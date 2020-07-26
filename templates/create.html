@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %} Login {% endblock %}
+{% block title %} Creat Game {% endblock %}
 {% block content %}
-    <div class="title-form">Login E(owo /</div>
-    <form method="post">
+    <div class="title-form">Create Game Q(owo /"</div>
+    <form method="post" class="form-create">
         <div class="form-group">
-            <label for="player_name">Player Name</label>
-            <input type="text" name="player_name" id="player_name"
-                   placeholder="輸入小隊名" class="form-control" value="{{request.form['player_name']}}">
+            <label for="game_name">Game Name</label>
+            <input type="text" name="game_name" id="game_name"
+                   placeholder="輸入此場遊戲名，以便他人辨識" class="form-control" value="{{request.form['game_name']}}">
         </div>
         <div class="form-group">
-            <label for="password">Password</label>
-            <input type="text" name="password" id="password"
-                   placeholder="輸入password" class="form-control">
+            <label for="player_amount_limit">Player Limit</label>
+            <input type="number" name="player_amount_limit" id="player_amount_limit"
+                   min="2" max="10" value="{{request.form['player_amount_limit'] or 5}}" class="form-control" >
         </div>
         <div class="form-group">
-            <button type="submit" class="btn btn-warning">Submit!!!</button>
+            <button type="submit" class="btn btn-warning">Start</button>
         </div>
     </form>
 {% endblock %}

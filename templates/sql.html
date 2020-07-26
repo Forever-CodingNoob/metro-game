@@ -2,7 +2,7 @@
 
 {% block title %} Postgresql {% endblock %}
 {% block content %}
-    <div class="title-form">Postgresql</div>
+    <div class="title-form">Postgresql P(owo p</div>
     <div>
         <h5>
             available commands:
@@ -11,8 +11,8 @@
             </ul>
             hints:
             <ul>
-                <li>可以一次執行多行</li>
-                <li>只會輸出最後一次SELECT(如果有多次SELECT)</li>
+                <li>可以一次執行多行(待修，因psql -c只看最後一句，考慮用psql -f)</li>
+                <li>只會執行最後一句</li>
                 <li>我沒排版qwq</li>
             </ul>
         </h5>
@@ -32,7 +32,7 @@
         <hr>
         <div class="form-group">
             <label for="db">Choose a Postgresql Database to execute commands:</label><br>
-            <select id="db" name="db">
+            <select id="db" name="db" class="form-control">
                 <option value="{{db_names.STATIONS_DB_NAME}}">Stations Info</option>
                 <option value="{{db_names.GAMES_DB_NAME}}">Games</option>
                 <option value="{{db_names.STATIONOWNED_DB_NAME}}">Stations Owned</option>

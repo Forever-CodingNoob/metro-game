@@ -1,14 +1,13 @@
 import sqlite3,os,subprocess
 import psycopg2,psycopg2.extras
-STATIONS_DB_NAME= 'STATIONS_INFO_DB'#題目db
-GAMES_DB_NAME= 'GAMES_DB'#每局資料db
-STATIONOWNED_DB_NAME= 'STATIONS_OWNED_DB'#每局佔領概況db
 class DB_NAMES:
     STATIONS_DB_NAME = 'STATIONS_INFO_DB'  # 題目db
     GAMES_DB_NAME = 'GAMES_DB'  # 每局資料db
     STATIONOWNED_DB_NAME = 'STATIONS_OWNED_DB'  # 每局佔領概況db
 
-SQLITE_NAME={'STATIONS_INFO_DB':'Stations.sqlite','GAMES_DB':'Games.sqlite','STATIONS_OWNED_DB':'StationsOwned.sqlite'}
+SQLITE_NAME={DB_NAMES.STATIONS_DB_NAME:'Stations.sqlite',
+             DB_NAMES.GAMES_DB_NAME:'Games.sqlite',
+             DB_NAMES.STATIONOWNED_DB_NAME:'StationsOwned.sqlite'}
 APP_NAME="metro-game"
 
 #x)記錄connection objects以免之後又要connect一遍太花時間
@@ -38,14 +37,19 @@ def executeSQL_fetchall(sql,db_filename):
 #execute postgresql in terminal
 def executeSQL_terminal_inhtml(sql,db_filename):
     db_url=getDBurl(db_filename)
+    sql=sql.replace('\n',' ')#使用psql不能有換行符
+    sql=sql.replace('\r',' ')#使用psql不能有換行符
     try:
         #利用terminal=>subprocess.Popen，用communicate() output
+        #注意：psql指令中不要出現換行符號\n，不然會程式卡住，另外，psql -c只會讀最後一句PostgreSQL指令
+        #但psycopg2輸入的postgresql指令可以有換行符號\n也不會出錯
         process=subprocess.Popen(f'psql --command "{sql}" --html {db_url}',stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding='utf-8',shell=True)
         output,error=process.communicate()#成功執行時在output輸出，反則在error輸出錯誤資訊
         print('output:',repr(output),',','error:',repr(error))
         results=output if not error else error
     except Exception as e:#若上方python語句執行有問題會到這，但若是sql指令有問題(termial中的問題)並不會報錯，而是輸出在stderr
         results=f"{e.__class__}:{e}"
+        raise e
     print('results:', repr(results))
     return results
 
