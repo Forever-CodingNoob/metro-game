@@ -29,13 +29,31 @@
         {% endif %}
     </div>
     <hr>
+    {% if session['game'] or True%}
+        <div class="owner">
+            <span>擁有者:{{station.owner.name or '無'}}</span>
+        </div>
+        <hr>
+    {% endif %}
     <div class="text">
         <p>{{ station['content'] }}</p>
     </div>
     {% if station['type'].find('題目')!=-1 %}  <!-- if there is '題目' in the type of station's problem -->
         <hr>
-        <div>
-            <p>答案:{{station['answer'] }}</p>
+        <div class="ans">
+            <span id="show" onclick="RevealAns();">答案</span><br>
+            <span id="ans">{{station['answer'] }}</span>
         </div>
     {% endif %}
+    <script>
+        function RevealAns(){
+            var answer_blank=document.querySelector(".ans #ans");
+            //alert(window.getComputedStyle(answer_blank).getPropertyValue('visibility'));
+            if (window.getComputedStyle(answer_blank).getPropertyValue('visibility')==='hidden'){
+                answer_blank.classList.add('Translate');
+            }else{
+                answer_blank.classList.remove('Translate');
+            }
+        }
+    </script>
 {% endblock %}

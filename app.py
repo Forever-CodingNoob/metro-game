@@ -15,11 +15,11 @@ print(app.secret_key)
 @app.route('/<path:station>')#?number=problem number
 def show_station(station):
     number=int(request.args.get('number','0'))#get the number of problem of this station, if the number is None then it is set to 0
-
+    gameid=session.get('game',None)
 
     #station=station.replace('_','/')#為避免'台北101/世貿'不能作為網址，故連結會導向'台北101_世貿'進入此函數，在此換成'台北101/世貿'!!!!!!!!!
-    print(f"station:{station}" , f"number:{number}")
-    station=Station(station,number)
+    print(f"station:{station}" , f"number:{number}", f"gameid:{gameid}")
+    station=Station(station,number,gameid=gameid)
     return render_template('station.html',station=station)
 @app.route('/station/<path:station>')
 def just_show_station(station):

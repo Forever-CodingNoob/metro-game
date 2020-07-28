@@ -37,12 +37,79 @@
             vertical-align:middle;
         }
         .tags{
+            font-family: 'Noto Sans TC', sans-serif;
             font-size: 1.5em;
             text-align:center;
         }
         .arrows{
             font-size: 1.5em;
             text-align:center;
+        }
+        div .owner{
+            font-family: 'Noto Sans TC', sans-serif;
+            text-align:center;
+            padding:10px 0px;
+        }
+        div .owner span{
+            padding: 0px 28px;
+            font-size:1.5em;
+            border:10px solid #0758a8;
+            background-color:#ffffff;
+            color:#0758a8;
+            transition-duration: 0.2s;
+            line-height:50px;
+            display:inline-block;
+        }
+        div .owner span:hover{
+            font-size:2em;
+            border-color:#ffffff;
+            background-color:#0080ff;
+            color:#ffffff;
+        }
+        div .ans{
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        div .ans #show{
+            font-size:1.5em;
+            padding: 0px 10px;
+            border:5px solid #0758a8;
+            background-color:#ffffff;
+            color:#0758a8;
+            transition-duration: 0.2s;
+            display:inline-block;
+        }
+        div .ans #show:hover{
+            border-color:#ffffff;
+            background-color:#0080ff;
+            color:#ffffff;
+        }
+        div .ans #ans{
+            display:inline-block;
+            font-size:1.5em;
+            margin-top:5px;
+            padding: 0px 10px;
+            border:0px solid #0758a8;
+            background-color:#ffffff;
+            color:#0758a8;
+            visibility:hidden;
+            border-radius:10px;
+            max-height:0px;
+            line-height:0px;
+            overflow: hidden;
+
+
+            transition: all 1s;
+            -moz-transition: all 1s; /* Firefox 4 */
+            -webkit-transition: all 1s; /* Safari and Chrome */
+            -o-transition: all 1s; /* Opera */
+            -ms-transition: all 1s; /* Explorer 10 */
+        }
+        div .ans #ans.Translate{
+            max-height:500px;
+            padding:5px 10px;
+            visibility:visible;
+            border-width:2px;
+            line-height:20px;
         }
         .title-form{
             font-size: 1.5em;

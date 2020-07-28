@@ -66,31 +66,23 @@ class Station(dict):
         super().__init__(problem)
         self.tags = Tag.getTags(self)
         import scripts.game as game
-        self.owner=game.Player(Station.getOwnerID(self.name,gameid)) if gameid else None
+        ownerid=Station.getOwnerID(self.name,gameid) if gameid else None#目前有無加入遊戲(旁觀or玩家)
+        self.owner=game.Player(ownerid) if ownerid else None#目前該站有無佔領人
         print(self)
 
     @staticmethod
     def getOwnerID(station_name,gameid):
         conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         cur=conn.cursor()
-        cur.execute(f"SELECT owner FROM {gameid} WHERE station='{station_name}' ORDER BY id DESC LIMIT 1")
-        ownerid=cur.fetchone()[0]
+        cur.execute(f"SELECT owner_id FROM {gameid} WHERE station='{station_name}' ORDER BY id DESC LIMIT 1")
+        result=cur.fetchone()
         conn.close()
+        if result is None or result[0]=='':#此站無佔領歷史or目前又被恢復成公有
+            ownerid=None
+        else:#此站有被佔領
+            ownerid=result[0]
         return ownerid
 
-
-
-
 '''
-def get_station(station,problem_number):
-    conn=get_db_connection()
-    contents=conn.execute(f'SELECT * FROM content_sorted WHERE station="{station}"').fetchall()
-    conn.close()
-    #problems=[{'type':content['type'],'exit':content['exit'],'content':content['content'],'answer':content['answer']} for content in contents]
-    content=contents[problem_number]
-    problem={'number':problem_number,'type': content['type'], 'exit': content['exit'], 'content': content['content'], 'answer': content['answer']}
-    station_infor = {'name':contents[0]['station'],'lines':contents[0]['lines_for_this_station'].split('/'),'grade':contents[0]['grade'],'number of problems':len(contents),'problem':problem}
-
-    print(station_infor)
-    return station_infor
+佔領玩家的playerid若是None，則表示該站變為公有地
 '''

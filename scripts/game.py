@@ -37,7 +37,7 @@ def startGame(players_amount,gamename=''):
                 id SERIAL PRIMARY KEY,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 station TEXT,
-                owner TEXT
+                owner_id INTEGER
                 );""")
     conn.commit()
     conn.close()
@@ -101,7 +101,7 @@ class Player:
     def getEverOwnedStations(self):
         conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         cur=conn.cursor()
-        cur.execute(f'SELECT station FROM {self.gameid} WHERE owner={self.id}')
+        cur.execute(f'SELECT station FROM {self.gameid} WHERE owner_id={self.id}')
         stations=cur.fetchall()
         conn.close()
         return [station[0] for station in stations]
@@ -142,11 +142,5 @@ class Player:
         raise Player.PlayerNotFoundError(f'player with name {name} not found.')
 
 
-"""
-DROP TABLE IF EXIST {gameid}
-CREATE TABLE {gameid}(
-    station TEXT PRIMARY KEY,
-    owner TEXT
-);
-"""
+
 #datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
