@@ -1,6 +1,6 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session,abort
 import sqlite3
-from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml
+from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml,Player
 import random
 import time
 import datetime
@@ -9,7 +9,19 @@ app=Flask(__name__)
 app.config['SECRET_KEY']="".join([chr(random.randint(32,126)) for i in range(10)])
 config_db_url(app)
 print(app.secret_key)
+app.jinja_env.globals.update(Player=Player)
+app.jinja_env.globals.update(getEverOwnedStations=Player.getEverOwnedStations)
+app.jinja_env.globals.update(hasSolvedProblem=Player.hasSolvedProblem)
+app.jinja_env.globals.update(hasSolvedAllProblems=Player.hasSolvedAllProblems)
 
+def check_if_in_game(func):
+    def wrapped(*args,**kwargs):
+        if not session.get('player_id'):#user is not player
+            flash('請先加入遊戲')
+            return redirect(request.headers.get("Referer"))
+        return func(*args,**kwargs)
+    wrapped.__name__=func.__name__
+    return wrapped
 
 
 @app.route('/<path:station>')#?number=problem number
@@ -21,6 +33,16 @@ def show_station(station):
     print(f"station:{station}" , f"number:{number}", f"gameid:{gameid}")
     station=Station(station,number,gameid=gameid)
     return render_template('station.html',station=station)
+@app.route('/<path:station>',methods=('POST',))#?number=problem number
+@check_if_in_game
+def occupy_station(station):#解題||佔領
+    number = int(request.args.get('number','0'))  # get the number of problem of this station, if the number is None then it is set to 0
+    gameid = session['game']
+    player_id=session['player_id']
+
+    Player(player_id).success(Station(station,number,gameid=gameid))
+    return redirect(url_for('show_station',station=station,number=number))
+
 @app.route('/station/<path:station>')
 def just_show_station(station):
     return redirect(url_for('show_station',station=station,number=0))
@@ -98,7 +120,7 @@ def sql_query_execute():
         return render_template('sql.html', output_in_html='', db_names=DB_NAMES,
                                auth=session.get('auth'))
 
-
+    print([command.split() for command in sql.split(';')])
     commands=[command.split()[0].upper() for command in sql.split(';')]
     ALLOWED_COMMANDS={'SELECT'}
     print('sql:',repr(sql),',','db_filename:',db_filename,',','commands:',commands,',','pretty-print:',prettyprint)

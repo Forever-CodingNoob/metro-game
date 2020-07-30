@@ -34,11 +34,23 @@ def startGame(players_amount,gamename=''):
     conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
     cur=conn.cursor()
     cur.execute(f"""CREATE TABLE {gameid}(
-                id SERIAL PRIMARY KEY,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                station TEXT,
-                owner_id INTEGER
-                );""")
+                    id SERIAL PRIMARY KEY,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    station TEXT,
+                    owner_id INTEGER
+                    );""")
+    conn.commit()
+    conn.close()
+
+    conn = get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+    cur = conn.cursor()
+    cur.execute(f"""CREATE TABLE {gameid}(
+                    id SERIAL PRIMARY KEY,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    station TEXT,
+                    problem_number INTEGER,
+                    player_id INTEGER
+                    );""")
     conn.commit()
     conn.close()
 def getCurrentGameId():
@@ -46,6 +58,12 @@ def getCurrentGameId():
 
 class Game:
     class GameNotFoundError(Exception):
+        pass
+    class GameTableNotFoundError(Exception):
+        pass
+    class OccupyError(Exception):
+        pass
+    class SolveError(Exception):
         pass
     def __init__(self,gameid):
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
@@ -98,10 +116,25 @@ class Player:
         self.name=player['name']
         self.gameid=player['gameid']
         self.id=player['id']
+    def getSolvedProblems(self):#解題歷史(不一定有佔領)
+        conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"SELECT DISTINCT station,problem_number FROM {self.gameid} WHERE player_id={self.id}")
+        result=cur.fetchall()
+        conn.close()
+
+        stations=set([i['station'] for i in result])
+        problem_solved={station:[i['problem_number'] for i in result if i['station']==station] for station in stations}
+        print(f'problems solved by player {self.name}:',problem_solved)
+        return problem_solved
+    def hasSolvedProblem(self,station,problem_num):
+        return problem_num in self.getSolvedProblems().get(station,[])
+    def hasSolvedAllProblems(self,station_obj):
+        return len(self.getSolvedProblems().get(station_obj.name,[])) >= station_obj.number_of_problems
     def getEverOwnedStations(self):
         conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         cur=conn.cursor()
-        cur.execute(f'SELECT station FROM {self.gameid} WHERE owner_id={self.id}')
+        cur.execute(f'SELECT DISTINCT station FROM {self.gameid} WHERE owner_id={self.id}')
         stations=cur.fetchall()
         conn.close()
         return [station[0] for station in stations]
@@ -140,6 +173,59 @@ class Player:
         if player:
             return Player(player[0])  # return the only player in the game that matches the givin name
         raise Player.PlayerNotFoundError(f'player with name {name} not found.')
+
+    def solved(self,station_obj):
+        print(f"player {self.name} has solved {station_obj.name}/{station_obj['number']}.")
+        #check if this problem is solved
+        if self.hasSolvedProblem(station_obj.name,station_obj['number']):
+            raise Game.SolveError(f'this problem has already been solved by himself in game {self.gameid}.')
+
+
+
+        conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+        cur=conn.cursor()
+        try:
+            cur.execute(f"""INSERT INTO {self.gameid}(station,problem_number,player_id) 
+                            VALUES('{station_obj.name}',{station_obj['number']},{self.id})""")
+            conn.commit()
+        except Exception as e:
+            raise Game.GameTableNotFoundError(f'there is no table for game {self.gameid} in PROBLEMS_SOLVED_DB.')
+        finally:
+            conn.close()
+        print('successfully recorded the solving in db!')
+
+
+    def occupy(self,station_obj):
+        print(f"player {self.name} is trying to occupy station {station_obj.name}.")
+        #check if this station is vacant
+        if station_obj.owner is not None:
+            raise Game.OccupyError(f'this station has already had its owner in game {self.gameid}.')
+
+
+
+        conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
+        cur=conn.cursor()
+        try:
+            cur.execute(f"""INSERT INTO {self.gameid}(station,owner_id)
+                            VALUES('{station_obj.name}',{self.id})""")
+            conn.commit()
+        except Exception as e:
+            raise Game.GameTableNotFoundError(f'there is no table for game {self.gameid} in STATIONS_OWNED_DB.')
+        finally:
+            conn.close()
+        print('successfully occupied this station!')
+
+    def success(self,station_obj):
+        try:
+            self.solved(station_obj)
+        except Game.SolveError as e:
+            print('error:',str(e))
+
+
+        try:
+            self.occupy(station_obj)
+        except Game.OccupyError as e:#someone has already owned this station
+            print('error:',str(e))
 
 
 

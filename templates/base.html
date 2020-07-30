@@ -53,18 +53,38 @@
         div .owner span{
             padding: 0px 28px;
             font-size:1.5em;
-            border:10px solid #0758a8;
-            background-color:#ffffff;
-            color:#0758a8;
+            border:10px solid;
             transition-duration: 0.2s;
             line-height:50px;
             display:inline-block;
         }
         div .owner span:hover{
             font-size:2em;
+        }
+        div .owner-blue span{
+            border-color: #0758a8;
+            background-color:#ffffff;
+            color:#0758a8;
+        }
+        div .owner-blue span:hover{
             border-color:#ffffff;
             background-color:#0080ff;
             color:#ffffff;
+        }
+        div .owner-green span{
+            border-color: #03a30e;
+            background-color:#ffffff;
+            color:#03a30e;
+        }
+        div .owner-green span:hover{
+            border-color:#ffffff;
+            background-color:#00e00f;
+            color:#ffffff;
+        }
+        div .owner.disabled span,div .owner.disabled span:hover{
+            border-color:#575757;
+            background-color:#b8b8b8;
+            color:#575757;
         }
         div .ans{
             font-family: 'Noto Sans TC', sans-serif;
@@ -213,17 +233,11 @@
 
             <ul class="nav navbar-nav ml-auto">
                 {% if session['player_id'] %}
-                    <button class="btn btn-dark navbar-btn">PlayerID:{{session['player_id']}}</button>
+                    <button class="btn btn-dark navbar-btn">PlayerName:{{Player(session['player_id']).name}}({{session['player_id']}})</button>
                 {% endif %}
                 {% if session['game'] %}
                     <button class="btn btn-danger navbar-btn" onclick="location.href='{{ url_for('showgame',gameid=session['game']) }}';">GamePin:{{session['game']}}</button>
                 {% endif %}
-                <li>
-                    <a class="nav-link" href="#">Login</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="#">Register</a>
-                </li>
                 <li>
                     <a class="nav-link" href="#">Give Up Playing</a>
                 </li>

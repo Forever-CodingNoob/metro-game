@@ -4,15 +4,20 @@ class DB_NAMES:
     STATIONS_DB_NAME = 'STATIONS_INFO_DB'  # 題目db
     GAMES_DB_NAME = 'GAMES_DB'  # 每局資料db
     STATIONOWNED_DB_NAME = 'STATIONS_OWNED_DB'  # 每局佔領概況db
+    PROBLEMSSOLVED_DB_NAME = 'PROBLEMS_SOLVED_DB' # 每局解題概況db
 
 SQLITE_NAME={DB_NAMES.STATIONS_DB_NAME:'Stations.sqlite',
              DB_NAMES.GAMES_DB_NAME:'Games.sqlite',
-             DB_NAMES.STATIONOWNED_DB_NAME:'StationsOwned.sqlite'}
+             DB_NAMES.STATIONOWNED_DB_NAME:'StationsOwned.sqlite',
+             DB_NAMES.PROBLEMSSOLVED_DB_NAME:'ProblemsSolved.sqlite'}
 APP_NAME="metro-game"
 
 #x)記錄connection objects以免之後又要connect一遍太花時間
 #但要每次conn.close()是好習慣，卻造成connection object不能再用，
-HEROKU_DB_URL={'STATIONS_INFO_DB':None,'GAMES_DB':None,'STATIONS_OWNED_DB':None}
+HEROKU_DB_URL={DB_NAMES.STATIONS_DB_NAME:None,
+               DB_NAMES.GAMES_DB_NAME:None,
+               DB_NAMES.STATIONOWNED_DB_NAME:None,
+               DB_NAMES.PROBLEMSSOLVED_DB_NAME:None}
 
 
 def config_db_url(app):

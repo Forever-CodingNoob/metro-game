@@ -28,32 +28,102 @@
             <a href="{{url_for('show_station',station=station.name,number=station['number']-1)}}"><span class="badge badge-dark"><--</span></a>
         {% endif %}
     </div>
-    <hr>
-    {% if session['game'] or True%}
-        <div class="owner">
+    {% if session['game'] is defined or True%}
+        <hr>
+        如果你還沒加入游戲看到我，就表示有bug
+        <div class="owner owner-blue" id="owner">
             <span>擁有者:{{station.owner.name or '無'}}</span>
         </div>
-        <hr>
     {% endif %}
-    <div class="text">
+    <div class="text" id="problem">
+        <hr>
         <p>{{ station['content'] }}</p>
     </div>
     {% if station['type'].find('題目')!=-1 %}  <!-- if there is '題目' in the type of station's problem -->
-        <hr>
-        <div class="ans">
+        <div class="ans" id="show_ans">
+            <hr>
             <span id="show" onclick="RevealAns();">答案</span><br>
             <span id="ans">{{station['answer'] }}</span>
         </div>
     {% endif %}
+
+
+    {% if session['game'] is defined or True%}
+        <hr>
+        如果你還沒加入游戲看到我，就表示有bug
+        {% if session['player_id'] is defined or True%}
+            如果你加入游戲後但還不是玩家卻看到我，就表示又有bug
+            <div class="owner owner-green" id="success">
+                <span onclick="success();">我是達達的馬蹄，請回報錯誤</span>
+                <form method="post" action="{{url_for('occupy_station',station=station.name,number=station['number'])}}"></form>
+            </div>
+        {% endif %}
+    {% endif %}
+
+
+
+
+
     <script>
         function RevealAns(){
-            var answer_blank=document.querySelector(".ans #ans");
-            //alert(window.getComputedStyle(answer_blank).getPropertyValue('visibility'));
-            if (window.getComputedStyle(answer_blank).getPropertyValue('visibility')==='hidden'){
-                answer_blank.classList.add('Translate');
-            }else{
-                answer_blank.classList.remove('Translate');
+            if (/*confirm('你確定要顯示答案ㄇ?')*/ true){
+                var answer_blank=document.querySelector(".ans #ans");
+                //alert(window.getComputedStyle(answer_blank).getPropertyValue('visibility'));
+                if (window.getComputedStyle(answer_blank).getPropertyValue('visibility')==='hidden'){
+                    answer_blank.classList.add('Translate');
+                }else{
+                    answer_blank.classList.remove('Translate');
+                }
             }
+        }
+        function success(){
+            if(confirm('你確定已通關?')){
+                var success_form=document.getElementById('success').getElementsByTagName('form')[0];
+                success_form.submit();
+            }
+        }
+
+
+        var isPlayer=Boolean(  {{session['player_id'] is defined|int}}  );
+        var hasOwner=Boolean(  {{station.owner is not none|int}}  );
+        var isOwner=Boolean(  {{(station.owner is not none and station.owner.id==session['player_id'])|int}}  );
+        var hasSolvedProblem=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedProblem(station.name,station['number']))|int}}  );
+        var hasSolvedAllProblems=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedAllProblems(station))|int}}  );
+
+        var btn=document.getElementById('success');
+        var text=btn.getElementsByTagName('span')[0];
+        if (!hasOwner && isPlayer){ //無人佔領且在遊戲中
+            if(hasSolvedAllProblems){
+                text.textContent='哇，你已經解完這站的所有題目ㄌ，直接佔領ㄅ';
+            }else if(hasSolvedProblem){
+                btn.classList.add('disabled');
+                text.onclick="";
+                text.textContent='此站仍有未解之題，請移至此站其他題目';
+            }else{
+                text.textContent='成功並佔領';
+            }
+        }else if(!hasSolvedProblem && isPlayer){//沒做過題目且在遊戲中
+            if (isOwner){
+                text.textContent='解題成功，但你早就占領此站ㄌ';
+            }else{
+                text.textContent='解題成功，但其他人早就占領此站ㄌ';
+            }
+        }else{//在遊戲中某人已佔領且玩家已解過題目||不在遊戲中=>取消按鈕
+            btn.classList.add('disabled');
+            text.onclick="";
+            if ( isPlayer ){
+                if(hasSolvedAllProblems){
+                    text.textContent='你完全解完這站ㄌ而且無法佔領，不爽告我ㄚ';
+                }else{
+                    text.textContent='此站仍有未解之題，請移至此站其他題目';
+                }
+            }else{
+                text.textContent='你還不是玩家ㄛ，快加入遊戲ㄅ!';
+            }
+        }
+        if(hasSolvedProblem&&isPlayer){
+            document.getElementById('problem').style.display='none';
+            document.getElementById('show_ans').style.display='none';
         }
     </script>
 {% endblock %}
