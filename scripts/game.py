@@ -1,4 +1,5 @@
 from .db_conn import get_db_connection,DB_NAMES
+from .score import Score
 #import scripts.stations as stations     don't import it here, otherwise it will cause circular imports
 from flask import session
 import random
@@ -65,6 +66,8 @@ class Game:
         pass
     class SolveError(Exception):
         pass
+    class LoginError(Exception):
+        pass
     def __init__(self,gameid):
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
@@ -91,14 +94,34 @@ class Game:
         conn.close()
         return [Game(gameid[0]) for gameid in gameids]
     @staticmethod
-    def join(gameid,name,password):
+    def register(gameid,name,password):#REGISTER
+        try:#check if the name is already used
+            same_name_player=Player.getOneplayer(gameid,name)
+        except Player.PlayerNotFoundError:#the name is unused
+            pass
+        else:#there's no error=>the name is used
+            raise Game.LoginError(f'"{name}" has already been used as name. Plz try another one.')
+
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
-        cur.execute(f"INSERT INTO players(name,gameid,password) VALUES('{name}','{gameid}','{password}')")
+        cur.execute(f"INSERT INTO players(name,gameid,password,score) VALUES('{name}','{gameid}','{password}',{Score['init_score']})")
         conn.commit()
         conn.close()
-        # make browser remenber the player logged in
+        # make browser remember the player logged in
         session['player_id']=Player.getOneplayer(gameid,name).id
+        # make browser remember the game
+        session['game'] = gameid
+
+    @staticmethod
+    def login(gameid,name,password):#LOGIN
+        try:
+            player=Player.getOneplayer(gameid,name)
+        except Player.PlayerNotFoundError as e:
+            raise Game.LoginError(f'player "{name}" not found!')
+        if player.password!=password:
+            raise Game.LoginError('password does not match!')
+        # make browser remember the player logged in
+        session['player_id'] = player.id
         # make browser remember the game
         session['game'] = gameid
 class Player:
@@ -116,6 +139,7 @@ class Player:
         self.name=player['name']
         self.gameid=player['gameid']
         self.id=player['id']
+        self.score=player['score']
     def getSolvedProblems(self):#解題歷史(不一定有佔領)
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
         cur=conn.cursor()
@@ -195,6 +219,11 @@ class Player:
         print('successfully recorded the solving in db!')
 
 
+        if station_obj.grade=='普通站':
+            self.addPoint(Score['normal_station_pass'])
+        else:
+            self.addPoint(Score['special_station_pass'])
+
     def occupy(self,station_obj):
         print(f"player {self.name} is trying to occupy station {station_obj.name}.")
         #check if this station is vacant
@@ -226,6 +255,16 @@ class Player:
             self.occupy(station_obj)
         except Game.OccupyError as e:#someone has already owned this station
             print('error:',str(e))
+    def setScore(self,score):
+        self.score=score
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f'UPDATE players SET score={self.score} WHERE id={self.id}')
+        conn.close()
+    def addPoint(self,point):
+        print(f'add {point} points to player {self.name}!')
+        self.setScore(self.score+point)
+
 
 
 

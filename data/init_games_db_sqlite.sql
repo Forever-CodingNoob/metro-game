@@ -13,5 +13,6 @@ CREATE TABLE players(
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT,
 	gameid TEXT,
-	password TEXT
+	password TEXT,
+	score INTEGER DEFAULT 0;
 ); 

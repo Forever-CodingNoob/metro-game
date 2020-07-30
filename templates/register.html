@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %} Login {% endblock %}
+{% block title %} Register {% endblock %}
 {% block content %}
-    <div class="title-form">Sign in E(owo /</div>
+    <div class="title-form">Register E(owo /</div>
     <form method="post">
         <div class="form-group">
             <label for="player_name">Player Name</label>
@@ -14,7 +14,7 @@
             <input type="text" name="password" id="password"
                    placeholder="輸入password" class="form-control">
         </div>
-        <a href="{{url_for('register',gameid=gameid)}}">don't have an account? Create one</a>
+        <a href="{{url_for('login',gameid=gameid)}}">have signed in before? Sign-in</a>
         <div class="form-group">
             <button type="submit" class="btn btn-warning">Submit!!!</button>
         </div>

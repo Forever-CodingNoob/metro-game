@@ -64,21 +64,41 @@ def showgame(gameid):
         print(str(e))
         return redirect(url_for('showgames'))
     return render_template('game.html',game=game)
+
 @app.route('/games/<string:gameid>/join')
-def joingame(gameid):
-    return render_template('login.html')
+def login(gameid):
+    return render_template('login.html',gameid=gameid)
 @app.route('/games/<string:gameid>/join',methods=('POST',))
-def joingame_submit(gameid):
-    player_name=request.form['player_name']
+def login_submit(gameid):
+    player_name = request.form['player_name']
+    password = request.form['password']
+    try:
+        Game.login(gameid, player_name, password)
+    except Game.LoginError as e:
+        flash(str(e))
+        return render_template('login.html',gameid=gameid)
+    return redirect(url_for('home'))
+
+@app.route('/games/<string:gameid>/register')
+def register(gameid):
+    return render_template('register.html',gameid=gameid)
+@app.route('/games/<string:gameid>/register',methods=('POST',))
+def register_submit(gameid):
+    player_name = request.form['player_name']
     if not player_name:
         flash('還敢匿名加入遊戲啊?')
-        return render_template('login.html')
-    password=request.form['password']
+        return render_template('register.html', gameid=gameid)
+    password = request.form['password']
     if not password:
         flash('還敢不設密碼啊?')
-        return render_template('login.html')
-    Game.join(gameid,player_name,password)
+        return render_template('register.html', gameid=gameid)
+    try:
+        Game.register(gameid, player_name, password)
+    except Game.LoginError as e:
+        flash(str(e))
+        return render_template('register.html',gameid=gameid)
     return redirect(url_for('home'))
+
 @app.route('/games')
 def showgames():
     games=Game.getAllGames()
@@ -121,7 +141,7 @@ def sql_query_execute():
                                auth=session.get('auth'))
 
     print([command.split() for command in sql.split(';')])
-    commands=[command.split()[0].upper() for command in sql.split(';')]
+    commands=[command.split()[0].upper() for command in sql.split(';') if command]
     ALLOWED_COMMANDS={'SELECT'}
     print('sql:',repr(sql),',','db_filename:',db_filename,',','commands:',commands,',','pretty-print:',prettyprint)
     if [command for command in commands if command not in ALLOWED_COMMANDS]==[] or session.get('auth')=='admin':

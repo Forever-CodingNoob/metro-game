@@ -11,7 +11,7 @@
             <div id="gamename"><h3>{{game.name}}</h3></div>
             <span class="badge badge-primary">created time:{{game.created_timestamp}}</span>
             <span><a href="{{ url_for('showgame', gameid=game.gameid) }}">view game</a></span>
-            <span><a href="{{url_for('joingame', gameid=game.gameid)}}">join game</a></span>
+            <span><a href="{{url_for('login', gameid=game.gameid)}}">join game</a></span>
         </div>
         <hr>
     {% endfor %}

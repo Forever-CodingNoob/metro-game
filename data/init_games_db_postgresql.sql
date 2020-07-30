@@ -13,5 +13,6 @@ CREATE TABLE players(
 	id SERIAL PRIMARY KEY,
 	name TEXT,
 	gameid TEXT,
-	password TEXT
+	password TEXT,
+	score INTEGER DEFAULT 0;
 );
