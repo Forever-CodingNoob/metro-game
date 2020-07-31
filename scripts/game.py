@@ -255,11 +255,14 @@ class Player:
             self.occupy(station_obj)
         except Game.OccupyError as e:#someone has already owned this station
             print('error:',str(e))
+    def fail(self,station_obj):
+        self.addPoint(Score['mission_fail'])
     def setScore(self,score):
         self.score=score
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
         cur.execute(f'UPDATE players SET score={self.score} WHERE id={self.id}')
+        conn.commit()
         conn.close()
     def addPoint(self,point):
         print(f'add {point} points to player {self.name}!')

@@ -43,9 +43,23 @@ def occupy_station(station):#解題||佔領
     Player(player_id).success(Station(station,number,gameid=gameid))
     return redirect(url_for('show_station',station=station,number=number))
 
+@app.route('/<path:station>/fail',methods=('POST',))#?number=problem number
+@check_if_in_game
+def fail_station(station):#解題失敗
+    number = int(request.args.get('number','0'))  # get the number of problem of this station, if the number is None then it is set to 0
+    gameid = session['game']
+    player_id=session['player_id']
+
+    Player(player_id).fail(Station(station,number,gameid=gameid))
+    return redirect(url_for('home'))
 @app.route('/station/<path:station>')
 def just_show_station(station):
     return redirect(url_for('show_station',station=station,number=0))
+
+
+
+
+
 
 @app.route('/startgame',methods=('POST','GET'))
 def startgame():

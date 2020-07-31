@@ -48,17 +48,18 @@
     {% endif %}
 
 
-    {% if session['game'] is defined or True%}
+
+    <div>
         <hr>
-        如果你還沒加入游戲看到我，就表示有bug
-        {% if session['player_id'] is defined or True%}
-            如果你加入游戲後但還不是玩家卻看到我，就表示又有bug
-            <div class="owner owner-green" id="success">
-                <span onclick="success();">我是達達的馬蹄，請回報錯誤</span>
-                <form method="post" action="{{url_for('occupy_station',station=station.name,number=station['number'])}}"></form>
-            </div>
-        {% endif %}
-    {% endif %}
+        <div class="owner owner-green" id="success">
+            <span onclick="success();">test</span>
+            <form method="post" action="{{url_for('occupy_station',station=station.name,number=station['number'])}}"></form>
+        </div>
+        <div class="owner owner-red disabled-hidden" id="fail">
+            <span onclick="fail();">解題失敗</span>
+            <form method="post" action="{{url_for('fail_station',station=station.name,number=station['number'])}}"></form>
+        </div>
+    </div>
 
 
 
@@ -82,7 +83,12 @@
                 success_form.submit();
             }
         }
-
+        function fail(){
+            if(confirm('你確定解題失敗?')){
+                var fail_form=document.getElementById('fail').getElementsByTagName('form')[0];
+                fail_form.submit();
+            }
+        }
 
         var isPlayer=Boolean(  {{session['player_id'] is defined|int}}  );
         var hasOwner=Boolean(  {{station.owner is not none|int}}  );
@@ -90,37 +96,48 @@
         var hasSolvedProblem=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedProblem(station.name,station['number']))|int}}  );
         var hasSolvedAllProblems=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedAllProblems(station))|int}}  );
 
-        var btn=document.getElementById('success');
-        var text=btn.getElementsByTagName('span')[0];
+        var suc_btn=document.getElementById('success');
+        var suc_text=suc_btn.getElementsByTagName('span')[0];
+        var fail_btn=document.getElementById('fail');
+        var fail_text=fail_btn.getElementsByTagName('span')[0];
         if (!hasOwner && isPlayer){ //無人佔領且在遊戲中
             if(hasSolvedAllProblems){
-                text.textContent='哇，你已經解完這站的所有題目ㄌ，直接佔領ㄅ';
+                suc_text.textContent='哇，你已經解完這站的所有題目ㄌ，直接佔領ㄅ';
+                fail_btn.classList.add('disabled');
+                fail_text.onclick="";
             }else if(hasSolvedProblem){
-                btn.classList.add('disabled');
-                text.onclick="";
-                text.textContent='此站仍有未解之題，請移至此站其他題目';
+                suc_btn.classList.add('disabled');
+                suc_text.onclick="";
+                suc_text.textContent='此站仍有未解之題，請移至此站其他題目';
+                fail_btn.classList.add('disabled');
+                fail_text.onclick="";
             }else{
-                text.textContent='成功並佔領';
+                suc_text.textContent='成功並佔領';
             }
         }else if(!hasSolvedProblem && isPlayer){//沒做過題目且在遊戲中
             if (isOwner){
-                text.textContent='解題成功，但你早就占領此站ㄌ';
+                suc_text.textContent='解題成功，但你早就占領此站ㄌ';
             }else{
-                text.textContent='解題成功，但其他人早就占領此站ㄌ';
+                suc_text.textContent='解題成功，但其他人早就占領此站ㄌ';
             }
         }else{//在遊戲中某人已佔領且玩家已解過題目||不在遊戲中=>取消按鈕
-            btn.classList.add('disabled');
-            text.onclick="";
+            suc_btn.classList.add('disabled');
+            suc_text.onclick="";
+            fail_btn.classList.add('disabled');
+            fail_text.onclick="";
             if ( isPlayer ){
                 if(hasSolvedAllProblems){
-                    text.textContent='你完全解完這站ㄌ而且無法佔領，不爽告我ㄚ';
+                    suc_text.textContent='你完全解完這站ㄌ而且無法佔領，不爽告我ㄚ';
                 }else{
-                    text.textContent='此站仍有未解之題，請移至此站其他題目';
+                    suc_text.textContent='此站仍有未解之題，請移至此站其他題目';
                 }
             }else{
-                text.textContent='你還不是玩家ㄛ，快加入遊戲ㄅ!';
+                suc_text.textContent='你還不是玩家ㄛ，快加入遊戲ㄅ!';
             }
         }
+
+
+
         if(hasSolvedProblem&&isPlayer){
             document.getElementById('problem').style.display='none';
             document.getElementById('show_ans').style.display='none';

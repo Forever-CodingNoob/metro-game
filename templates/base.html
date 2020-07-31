@@ -22,6 +22,26 @@
         .nav-title{
             font-size: 2em;
         }
+        .game-info-text{
+            padding:.5rem .5rem;
+            color:#009e1d;
+            border:5px solid #009e1d;
+            border-radius:10px;
+            margin:.5rem 0rem;
+            display:block;
+            text-align:center;
+        }
+        @media (min-width:768px){
+            .game-info-text{
+                margin:0rem .3rem;
+                display:inline-block;
+            }
+        }
+        .game-info-text:hover{
+            border-color:#009e1d;
+            color:#ffffff;
+            background-color:#009e1d;
+        }
         .text{
             font-family: source-han-sans-traditional, sans-serif;
             font-weight: 200;
@@ -81,10 +101,23 @@
             background-color:#00e00f;
             color:#ffffff;
         }
+        div .owner-red span{
+            border-color: #c90000;
+            background-color:#ffffff;
+            color:#c90000;
+        }
+        div .owner-red span:hover{
+            border-color:#ffffff;
+            background-color:#ff0000;
+            color:#ffffff;
+        }
         div .owner.disabled span,div .owner.disabled span:hover{
             border-color:#575757;
             background-color:#b8b8b8;
             color:#575757;
+        }
+        div .owner.disabled.disabled-hidden span{
+            display:none;
         }
         div .ans{
             font-family: 'Noto Sans TC', sans-serif;
@@ -208,37 +241,49 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand nav-title" href="{{ url_for('home')}}">捷運大大大富翁!</a>
+        <a class="navbar-brand nav-title" href="{{ url_for('home')}}">
+            <img src="{{url_for('static', filename='img/favicon.ico')}}" style="height:20px;width:auto;">
+            捷運大大大富翁!
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="nav navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">車站(沒功能拉)</a>
-                </li>
-                <li class="nav-item active">
                     <a class="nav-link" href="{{url_for('showgames')}}">加入遊戲</a>
                 </li>
-                <li class="nav-item active">
-                    <form action="{{url_for('johnnysucks')}}"  method="POST"><!--post=>form-->
-                        <a class="nav-link" href="#" onclick="this.parentNode.submit();">電一下林致中</a>
-                    </form>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="{{url_for('sql_query_editor')}}">Postgresql Query Tool</a>
+                <li class="dropdown active">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">有的沒的<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item">
+                            <form action="{{url_for('johnnysucks')}}"  method="POST"><!--post=>form-->
+                                <a class="nav-link" href="#" onclick="this.parentNode.submit();">電一下林致中</a>
+                            </form>
+                        </li>
+                        <li class="dropdown-item">
+                            <a class="nav-link" href="{{url_for('sql_query_editor')}}">Postgresql Query Tool</a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
 
 
             <ul class="nav navbar-nav ml-auto">
-                {% if session['player_id'] %}
-                    <button class="btn btn-dark navbar-btn">PlayerName:{{Player(session['player_id']).name}}({{session['player_id']}})</button>
+                {% if session['player_id'] is defined %}
+                    <li>
+                        <span class="game-info-text">PlayerName:{{Player(session['player_id']).name}}({{session['player_id']}})</span>
+                    </li>
+                    <li>
+                        <span class="game-info-text">Score:{{Player(session['player_id']).score}}</span>
+                    </li>
                 {% endif %}
-                {% if session['game'] %}
+                {% if session['game'] is defined %}
                     <button class="btn btn-danger navbar-btn" onclick="location.href='{{ url_for('showgame',gameid=session['game']) }}';">GamePin:{{session['game']}}</button>
                 {% endif %}
-                <li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="nav-item active">
                     <a class="nav-link" href="#">Give Up Playing</a>
                 </li>
             </ul>
