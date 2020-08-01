@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %} Record {% endblock %}
+{% block content %}
+    <style>
+        .record-text span{
+            margin:.3rem;
+            color:#ff0000;
+        }
+    </style>
+    <div class="title">紀錄</div>
+    {% for record in records %}
+        <hr>
+        <div class="game-info">
+            <span class="badge badge-primary record-timestamp">time:{{record['timestamp']}}</span>►
+            <span class="record-text">
+                {% if record['type']=='station' %}
+                玩家<span>{{player.name}}</span>佔領了<span>{{record['station']}}</span>站
+                {% elif record['type']=='problem' %}
+                玩家<span>{{player.name}}</span>成功解完<span>{{record['station']}}</span>站的第<span>{{record['number']}}</span>個任務
+                {% endif %}
+            </span>
+        </div>
+    {% endfor %}
+{% endblock %}

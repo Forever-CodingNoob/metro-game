@@ -2,8 +2,7 @@ from flask import Flask,url_for,redirect,render_template,flash,Request,request,s
 import sqlite3
 from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml,Player
 import random
-import time
-import datetime
+import time,pytz
 
 app=Flask(__name__)
 app.config['SECRET_KEY']="".join([chr(random.randint(32,126)) for i in range(10)])
@@ -189,6 +188,13 @@ def auth():
             abort(403)
         return render_template('auth.html',referer=referer)
 
+@app.route('/history')
+def gameplay_history():
+    player_id=request.args.get('playerid')
+    if not player_id:
+        abort(404)
+    records=(player:=Player(player_id)).getRecord(pytz.timezone('Asia/Taipei'))
+    return render_template('record.html',records=records,player=player)
 if __name__=='__main__':
     app.run()
 

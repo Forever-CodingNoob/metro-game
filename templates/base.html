@@ -207,6 +207,15 @@
             font-size:2em;
             font-family: 'Noto Sans TC', sans-serif;
         }
+        .record-timestamp{
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size:1em;
+            margin-right:1rem;
+        }
+        .record-text{
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size:1.5em;
+        }
         *{
             /*border:1px solid #000;*/
         }
@@ -253,6 +262,11 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{{url_for('showgames')}}">加入遊戲</a>
                 </li>
+                {% if session['player_id'] is defined %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{url_for('gameplay_history',playerid=session['player_id'])}}">紀錄</a>
+                </li>
+                {% endif %}
                 <li class="dropdown active">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">有的沒的<span class="caret"></span></a>
                     <ul class="dropdown-menu">

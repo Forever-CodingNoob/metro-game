@@ -2,7 +2,7 @@ from .db_conn import get_db_connection,DB_NAMES
 from .score import Score
 #import scripts.stations as stations     don't import it here, otherwise it will cause circular imports
 from flask import session
-import random
+import random,pytz
 SYMBOLS=[chr(i) for i in range(48,58)]+[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
 def getRandSymbol(length):
     return "".join([random.choice(SYMBOLS) for i in range(length)])
@@ -267,6 +267,28 @@ class Player:
     def addPoint(self,point):
         print(f'add {point} points to player {self.name}!')
         self.setScore(self.score+point)
+    def getRecord(self,tz):
+        conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f'SELECT * FROM {self.gameid} WHERE owner_id={self.id} ORDER BY id DESC')
+        station_results=[{'type':'station','timestamp':i['timestamp'],'station':i['station']} for i in cur.fetchall()]
+        conn.close()
+
+        conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f'SELECT * FROM {self.gameid} WHERE player_id={self.id} ORDER BY id DESC')
+        problem_results=[{'type':'problem','timestamp':i['timestamp'],'station':i['station'],'number':i['problem_number']} for i in cur.fetchall()]
+        conn.close()
+
+
+        sorted=station_results+problem_results
+        sorted.sort(key=lambda x:x['timestamp'],reverse=True)
+        for i in sorted:#調整時區
+            utc_time=pytz.utc.localize(i['timestamp'])
+            i['timestamp']=utc_time.astimezone(tz).strftime('%Y年 %m月 %d日 %H點 %M:%S')
+        print('sorted_history:',sorted)
+        return sorted
+
 
 
 
