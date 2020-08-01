@@ -3,10 +3,10 @@
 {% block title %} auth {% endblock %}
 {% block content %}
     referer:{{referer}}
-    <form action="{{url_for('auth',referer=referer)}}" method="post" class="form-auth">
+    <form action="{{url_for('auth',referer=referer,description=description)}}" method="post" class="form-auth">
         <div>
             <input type="text" name="secret_key" id="secret_key" class="col-xs-25"
-                       placeholder="enter secret key" class="form-control">
+                       placeholder="{{description}}" class="form-control">
         </div>
         <button type="submit" class="btn btn-danger">confirm</button>
     </form>

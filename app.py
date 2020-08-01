@@ -16,15 +16,22 @@ app.jinja_env.globals.update(getEverOwnedStations=Player.getEverOwnedStations)
 app.jinja_env.globals.update(hasSolvedProblem=Player.hasSolvedProblem)
 app.jinja_env.globals.update(hasSolvedAllProblems=Player.hasSolvedAllProblems)
 
-def check_if_in_game(func):
+def check_if_is_player(func):
     def wrapped(*args,**kwargs):
         if not session.get('player_id'):#user is not player
+            flash('請先加入遊戲並成為玩家')
+            return redirect(request.headers.get("Referer"))
+        return func(*args,**kwargs)
+    wrapped.__name__=func.__name__
+    return wrapped
+def check_if_in_game(func):
+    def wrapped(*args,**kwargs):
+        if not session.get('game'):#user is not in game
             flash('請先加入遊戲')
             return redirect(request.headers.get("Referer"))
         return func(*args,**kwargs)
     wrapped.__name__=func.__name__
     return wrapped
-
 
 @app.route('/<path:station>')#?number=problem number
 def show_station(station):
@@ -36,7 +43,7 @@ def show_station(station):
     station=Station(station,number,gameid=gameid)
     return render_template('station.html',station=station)
 @app.route('/<path:station>',methods=('POST',))#?number=problem number
-@check_if_in_game
+@check_if_is_player
 def occupy_station(station):#解題||佔領
     number = int(request.args.get('number','0'))  # get the number of problem of this station, if the number is None then it is set to 0
     gameid = session['game']
@@ -46,7 +53,7 @@ def occupy_station(station):#解題||佔領
     return redirect(url_for('show_station',station=station,number=number))
 
 @app.route('/<path:station>/fail',methods=('POST',))#?number=problem number
-@check_if_in_game
+@check_if_is_player
 def fail_station(station):#解題失敗
     number = int(request.args.get('number','0'))  # get the number of problem of this station, if the number is None then it is set to 0
     gameid = session['game']
@@ -81,10 +88,10 @@ def showgame(gameid):
         return redirect(url_for('showgames'))
     return render_template('game.html',game=game)
 
-@app.route('/games/<string:gameid>/join')
+@app.route('/games/<string:gameid>/login')
 def login(gameid):
     return render_template('login.html',gameid=gameid)
-@app.route('/games/<string:gameid>/join',methods=('POST',))
+@app.route('/games/<string:gameid>/login',methods=('POST',))
 def login_submit(gameid):
     player_name = request.form['player_name']
     password = request.form['password']
@@ -114,6 +121,23 @@ def register_submit(gameid):
         flash(str(e))
         return render_template('register.html',gameid=gameid)
     return redirect(url_for('home'))
+@app.route('/logout',methods=('POST',))
+@check_if_is_player
+def logout():
+    Game.logout(player:=Player(session['player_id']))
+    flash(f'logged out from player {player.name}({player.id}).')
+    return redirect(url_for('home'))
+@app.route('/quitgmae',methods=('POST',))
+@check_if_in_game
+def quitgame():
+    gameid=session['game']
+    Game.quitgame()
+    flash(f"quitted game {gameid}.")
+    return redirect(url_for('home'))
+
+
+
+
 
 @app.route('/games')
 def showgames():
@@ -144,7 +168,7 @@ def johnnysucks():
     return redirect(request.headers.get("Referer"))
 @app.route('/sql')
 def sql_query_editor():
-    return render_template('sql.html',logs='',output_in_html='',db_names=DB_NAMES,auth=session.get('auth'))
+    return render_template('sql.html',logs='',output_in_html='',db_names=DB_NAMES,auth=session.get('auth_id'))
 @app.route('/sql',methods=('POST',))
 def sql_query_execute():
     sql=request.form['sql']
@@ -172,24 +196,60 @@ def sql_query_execute():
     else:#there is a prohibited command in sql commands
         results=f'COMMAND {[command for command in commands if command not in ALLOWED_COMMANDS]} IS NOT ALLOWED OR INVALID'
     logs=request.form['sql-log']+'\n\n('+db_filename+')>>'+sql+'\noutput:\n'+results
-    return render_template('sql.html',logs=logs,output_in_html=output_in_html,db_names=DB_NAMES,auth=session.get('auth'))
+    return render_template('sql.html',logs=logs,output_in_html=output_in_html,db_names=DB_NAMES,auth=session.get('auth_id'))
+@app.route('/system_auth')
+def system_auth():
+    referer=request.args.get('referer',request.headers.get("Referer"))
+    return start_auth(
+                description='enter SECREY KEY',
+                correct_keys=[app.config['SECRET_KEY']],
+                referer=referer,
+                method='get',
+                setSession=True,
+                session_key='auth_id',
+                correct_value='admin',
+                wrong_value='visitor'
+            )
+
 @app.route('/auth',methods=('POST','GET'))
 def auth():
+    if not session.get('auth'):
+        abort(404)
     if request.method=='POST':#POST
         referer = request.args.get('referer')
-        if request.form['secret_key']==app.config['SECRET_KEY']:
+        if request.form['secret_key'] in session['auth']['keys']:
             flash('successfully authorized!')
-            session['auth']='admin'
-            return redirect(referer)
+            if session['auth']['setSession']:
+                session[session['auth']['session_key']]=session['auth']['correct_value']
+
+            method=session['auth']['method'].lower()
+            session.pop('auth')
+            if method=='post':
+                return redirect(referer,code=307)#post
+            elif method=='get':
+                return redirect(referer)#get
+            raise ConnectionAbortedError('method needs to be post or get!')
         else:
             flash('SECRET_KEY is not correct.')
-            session['auth']='visitor'
-            return render_template('auth.html',referer=referer)
+            if session['auth']['setSession']:
+                session[session['auth']['session_key']]=session['auth']['wrong_value']
+            #session['auth']='visitor' admin
+            return render_template('auth.html',referer=referer,description=request.args.get('description'))
     else:#GET
-        referer = request.headers.get("Referer")  # 導向來源路徑
+        referer = request.args.get('referer')  # 導向來源路徑
         if referer is None:
             abort(403)
-        return render_template('auth.html',referer=referer)
+        description=request.args.get('description')
+        return render_template('auth.html',referer=referer,description=description)
+
+def start_auth(*,description,correct_keys,referer,method,setSession,session_key,correct_value,wrong_value):
+    session['auth']={'keys':correct_keys,
+                     'method':method,
+                     'setSession':setSession,
+                     'session_key':session_key,
+                     'correct_value':correct_value,
+                     'wrong_value':wrong_value}
+    return redirect(url_for('auth',description=description,referer=referer))
 
 @app.route('/history')
 def gameplay_history():

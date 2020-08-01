@@ -25,11 +25,12 @@
         .game-info-text{
             padding:.5rem .5rem;
             color:#009e1d;
-            border:5px solid #009e1d;
+            border:3px solid #009e1d;
             border-radius:10px;
             margin:.5rem 0rem;
             display:block;
             text-align:center;
+            transition:all .3s;
         }
         @media (min-width:768px){
             .game-info-text{
@@ -41,6 +42,16 @@
             border-color:#009e1d;
             color:#ffffff;
             background-color:#009e1d;
+        }
+        .game-info-text#gameid{
+            border-color:#00aee8;
+            color:#00aee8;
+            background-color:#ffffff;
+        }
+        .game-info-text#gameid:hover{
+            border-color:#00e5ff;
+            color:#ffffff;
+            background-color:#00e5ff;
         }
         .text{
             font-family: source-han-sans-traditional, sans-serif;
@@ -259,9 +270,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="nav navbar-nav mr-auto">
+                {% if session['game'] is not defined %}
                 <li class="nav-item active">
                     <a class="nav-link" href="{{url_for('showgames')}}">加入遊戲</a>
                 </li>
+                {% endif %}
                 {% if session['player_id'] is defined %}
                 <li class="nav-item active">
                     <a class="nav-link" href="{{url_for('gameplay_history',playerid=session['player_id'])}}">紀錄</a>
@@ -286,20 +299,38 @@
             <ul class="nav navbar-nav ml-auto">
                 {% if session['player_id'] is defined %}
                     <li>
-                        <span class="game-info-text">PlayerName:{{Player(session['player_id']).name}}({{session['player_id']}})</span>
+                        <span class="game-info-text" id="player_name">PlayerName:{{Player(session['player_id']).name}}({{session['player_id']}})</span>
                     </li>
                     <li>
-                        <span class="game-info-text">Score:{{Player(session['player_id']).score}}</span>
+                        <span class="game-info-text" id="score">Score:{{Player(session['player_id']).score}}</span>
                     </li>
                 {% endif %}
                 {% if session['game'] is defined %}
-                    <button class="btn btn-danger navbar-btn" onclick="location.href='{{ url_for('showgame',gameid=session['game']) }}';">GamePin:{{session['game']}}</button>
+                    <li>
+                        <span class="game-info-text" id="gameid" onclick="location.href='{{ url_for('showgame',gameid=session['game']) }}';">GamePin:{{session['game']}}</span>
+                    </li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Give Up Playing</a>
+                {% if session['player_id'] is defined %}
+                <button class="btn btn-danger navbar-btn" onclick="logout();">Give up playing</button>
+                <form method="post" action="{{url_for('logout')}}" id="logout_form"></form>
+                {% endif %}
+                {% if session['game'] is defined and session['player_id'] is not defined %}
+                <button class="btn btn-danger navbar-btn" onclick="quitgame();">Quit Game (qwq</button>
+                <form method="post" action="{{url_for('quitgame')}}" id="quitgame_form"></form>
+                {% endif %}
+
+                {% if session['game'] is defined %}
+                <li class="dropdown active">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li class="dropdown-item">
+                            <a class="nav-link" href="{{url_for('sql_query_editor')}}">END GAME</a>
+                        </li>
+                    </ul>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
@@ -315,7 +346,18 @@
         {% block content %} {% endblock %}
     </div>
 
-
+    <script>
+        function logout(){
+            if(confirm('你確定要退出遊玩ㄇ(會成為旁觀者)?')){
+                document.getElementById('logout_form').submit();
+            }
+        }
+        function quitgame(){
+            if(confirm('你確定要退出遊戲ㄇ(可以再加入)?')){
+                document.getElementById('quitgame_form').submit();
+            }
+        }
+    </script>
 
 
   </body>

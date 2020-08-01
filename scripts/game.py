@@ -83,6 +83,7 @@ class Game:
         self.name=game_info['name'] if game_info['name'] is not None else ''
         self.status=game_info['status']
         self.players_amount=game_info['players_amount']
+        self.current_players_amount=len(Player.getAllplayer_ids(self.gameid))
         #too slow=>self.players=Player.getAllplayers(gameid)
         #game_info_dict={'gameid':game_info['id']}
     @staticmethod
@@ -93,14 +94,21 @@ class Game:
         gameids=cur.fetchall()
         conn.close()
         return [Game(gameid[0]) for gameid in gameids]
+
+    #建議不要用staticmethod，因為要檢查是否有此遊戲
     @staticmethod
     def register(gameid,name,password):#REGISTER
-        try:#check if the name is already used
+        '''check if the name is already used'''
+        try:
             same_name_player=Player.getOneplayer(gameid,name)
         except Player.PlayerNotFoundError:#the name is unused
             pass
         else:#there's no error=>the name is used
             raise Game.LoginError(f'"{name}" has already been used as name. Plz try another one.')
+
+        '''check if the game is full'''
+        if Game(gameid).players_amount<=len(Player.getAllplayer_ids(gameid)):#the game is full
+            raise Game.LoginError('the game is full!')
 
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
@@ -124,6 +132,15 @@ class Game:
         session['player_id'] = player.id
         # make browser remember the game
         session['game'] = gameid
+
+    @staticmethod
+    def logout(player_obj):
+        session.pop('player_id')
+    @staticmethod
+    def quitgame():
+        session.pop('player_id',None)
+        session.pop('game')
+
 class Player:
     class PlayerNotFoundError(Exception):
         pass
@@ -171,15 +188,17 @@ class Player:
         print(f'player {self.name} owns {owned_stations}.')
         return owned_stations
 
-
+    @staticmethod
+    def getAllplayer_ids(gameid):
+        conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
+        cur = conn.cursor()
+        cur.execute(f"SELECT id FROM players WHERE gameid='{gameid}'")
+        playerids = cur.fetchall()
+        conn.close()
+        return [playerid[0] for playerid in playerids]
     @staticmethod
     def getAllplayers(gameid):
-        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
-        cur=conn.cursor()
-        cur.execute(f"SELECT id FROM players WHERE gameid='{gameid}'")
-        playerids=cur.fetchall()
-        conn.close()
-        return [Player(playerid[0]) for playerid in playerids]
+        return [Player(playerid) for playerid in Player.getAllplayer_ids(gameid)]
     @staticmethod
     def getOneplayer_slow(gameid,name):
         players=Player.getAllplayers(gameid)

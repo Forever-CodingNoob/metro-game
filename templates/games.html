@@ -10,6 +10,8 @@
             <div id="gameid"><h2>{{game.gameid}}</h2></div>
             <div id="gamename"><h3>{{game.name}}</h3></div>
             <span class="badge badge-primary">created time:{{game.created_timestamp}}</span>
+            <span class="badge badge-warning badge-pill">players:{{game.current_players_amount}}/{{game.players_amount}}</span>
+            <br>
             <span><a href="{{ url_for('showgame', gameid=game.gameid) }}">view game</a></span>
             <span><a href="{{url_for('login', gameid=game.gameid)}}">join game</a></span>
         </div>

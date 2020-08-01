@@ -52,7 +52,7 @@
         </div>
     </form>
     {% if auth!='admin' %}
-        <a href="{{url_for('auth')}}"><button>auth</button></a>
+        <a href="{{url_for('system_auth',referer=url_for('sql_query_editor'))}}"><button>auth</button></a>
     {% endif %}
 
 
