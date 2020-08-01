@@ -5,6 +5,7 @@ class DB_NAMES:
     GAMES_DB_NAME = 'GAMES_DB'  # 每局資料db
     STATIONOWNED_DB_NAME = 'STATIONS_OWNED_DB'  # 每局佔領概況db
     PROBLEMSSOLVED_DB_NAME = 'PROBLEMS_SOLVED_DB' # 每局解題概況db
+    SESSION_REDIS = 'REDIS' #session(using redis to save data)
 
 SQLITE_NAME={DB_NAMES.STATIONS_DB_NAME:'Stations.sqlite',
              DB_NAMES.GAMES_DB_NAME:'Games.sqlite',
@@ -76,7 +77,7 @@ def getDBurl(db_filename):
 
         db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1]  # 去掉換行符號\n
     except Exception as e:
-        raise OSError("cannot get database's url from system.")
+        raise OSError("cannot get sql database's url from system.")
 
     return db_url
 
@@ -130,3 +131,15 @@ def get_db_connection(db_filename,cursor_factory=psycopg2.extras.DictCursor):
 # cur.execute('sql query')
 # print(cur.fetchall())
 # conn.close()
+
+
+def getREDISurl():
+    # get redis url=>windows:heroku cli in terminal, heroku:env variables
+    try:  # running on heroku
+        redis_url = os.environ[DB_NAMES.SESSION_REDIS]
+    except KeyError:  # running on windows
+        redis_url = os.popen(f"heroku config:get {DB_NAMES.SESSION_REDIS} --app {APP_NAME}").read()[:-1]  # 去掉換行符號\n
+    except Exception as e:
+        raise OSError("cannot get redis url from system.")
+    print('redis_url:',redis_url)
+    return redis_url

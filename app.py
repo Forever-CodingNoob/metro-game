@@ -1,13 +1,16 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session,abort
-import sqlite3
 from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml,Player
-import random
 import time,pytz
+from flask_session import Session
 
 app=Flask(__name__)
-app.config['SECRET_KEY']="".join([chr(random.randint(32,126)) for i in range(10)])
+app.config.from_object('config.Config')
 config_db_url(app)
 print(app.secret_key)
+
+sess=Session()
+sess.init_app(app)
+
 app.jinja_env.globals.update(Player=Player)
 app.jinja_env.globals.update(getEverOwnedStations=Player.getEverOwnedStations)
 app.jinja_env.globals.update(hasSolvedProblem=Player.hasSolvedProblem)
