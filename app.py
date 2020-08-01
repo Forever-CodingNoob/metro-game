@@ -127,14 +127,16 @@ def logout():
     Game.logout(player:=Player(session['player_id']))
     flash(f'logged out from player {player.name}({player.id}).')
     return redirect(url_for('home'))
-@app.route('/quitgmae',methods=('POST',))
+@app.route('/quitgame',methods=('POST',))
 @check_if_in_game
 def quitgame():
     gameid=session['game']
     Game.quitgame()
     flash(f"quitted game {gameid}.")
     return redirect(url_for('home'))
-
+@app.route('/games/<string:gameid>/end')
+def endgame():
+    return 'none'
 
 
 
