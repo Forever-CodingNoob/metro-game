@@ -196,6 +196,10 @@ class Game:
             return func(player_obj,*arg,**kwargs)
         return wrapped
 
+
+
+
+
 class Player:
     class PlayerNotFoundError(Exception):
         pass

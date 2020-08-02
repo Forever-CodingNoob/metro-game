@@ -17,6 +17,15 @@ app.jinja_env.globals.update(getEverOwnedStations=Player.getEverOwnedStations)
 app.jinja_env.globals.update(hasSolvedProblem=Player.hasSolvedProblem)
 app.jinja_env.globals.update(hasSolvedAllProblems=Player.hasSolvedAllProblems)
 
+@app.before_request
+def check_if_game_exits():
+    if gameid:=session.get('game'):
+        try:
+            game = Game(gameid)
+        except Game.GameNotFoundError:
+            print(f"detected game {gameid} doesn't exist but it's in session.  Try quitting the game...")
+            Game.quitgame()
+
 def check_if_is_player(func):
     def wrapped(*args,**kwargs):
         if not session.get('player_id'):#user is not player
