@@ -3,16 +3,18 @@ from .score import Score
 #import scripts.stations as stations     don't import it here, otherwise it will cause circular imports
 from flask import session
 import random,pytz
-SYMBOLS=[chr(i) for i in range(48,58)]+[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
-def getRandSymbol(length):
-    return "".join([random.choice(SYMBOLS) for i in range(length)])
+NUMBERS=[chr(i) for i in range(48,58)]
+ALPHABETS=[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
+SYMBOLS=NUMBERS+ALPHABETS
+def getRandSymbol(length,allowNumberStarting=True):
+    return "".join([random.choice(SYMBOLS)  if i!=0 or allowNumberStarting else random.choice(ALPHABETS) for i in range(length)])
 def startGame(players_amount,gamename=''):
     conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
     print('a new game created.')
 
     #summon random and distinct gameid
     while True:
-        gameid=getRandSymbol(6)#溢位?
+        gameid=getRandSymbol(6,allowNumberStarting=False)#溢位?
         cur=conn.cursor()
         cur.execute(f"SELECT * FROM games WHERE id='{gameid}'")
         if cur.fetchall():
@@ -58,6 +60,8 @@ def startGame(players_amount,gamename=''):
                     );""")
     conn.commit()
     conn.close()
+
+    return secret_key
 def getCurrentGameId():
     return "" if not session['game'] else session['game']
 
