@@ -6,8 +6,8 @@ CREATE TABLE games(
 	started_timestamp TIMESTAMP,
 	name TEXT,
 	status TEXT,
-	players_amount INTEGER
-
+	players_amount INTEGER,
+	secret_key TEXT
 );
 CREATE TABLE players(
 	id SERIAL PRIMARY KEY,

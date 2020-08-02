@@ -91,16 +91,18 @@
         }
 
         var isPlayer=Boolean(  {{session['player_id'] is defined|int}}  );
+        var isInGame=Boolean(  {{session['game'] is defined|int}}  );
         var hasOwner=Boolean(  {{station.owner is not none|int}}  );
         var isOwner=Boolean(  {{(station.owner is not none and station.owner.id==session['player_id'])|int}}  );
         var hasSolvedProblem=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedProblem(station.name,station['number']))|int}}  );
         var hasSolvedAllProblems=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedAllProblems(station))|int}}  );
+        var gameEnded=Boolean(  {{(Game(session['game']).status=='ended') |int}}  );
 
         var suc_btn=document.getElementById('success');
         var suc_text=suc_btn.getElementsByTagName('span')[0];
         var fail_btn=document.getElementById('fail');
         var fail_text=fail_btn.getElementsByTagName('span')[0];
-        if (!hasOwner && isPlayer){ //無人佔領且在遊戲中
+        if (!hasOwner && isPlayer && !gameEnded){ //無人佔領且在遊戲中
             if(hasSolvedAllProblems){
                 suc_text.textContent='哇，你已經解完這站的所有題目ㄌ，直接佔領ㄅ';
                 fail_btn.classList.add('disabled');
@@ -114,23 +116,25 @@
             }else{
                 suc_text.textContent='成功並佔領';
             }
-        }else if(!hasSolvedProblem && isPlayer){//沒做過題目且在遊戲中
+        }else if(!hasSolvedProblem && isPlayer && !gameEnded){//沒做過題目且在遊戲中
             if (isOwner){
                 suc_text.textContent='解題成功，但你早就占領此站ㄌ';
             }else{
                 suc_text.textContent='解題成功，但其他人早就占領此站ㄌ';
             }
-        }else{//在遊戲中某人已佔領且玩家已解過題目||不在遊戲中=>取消按鈕
+        }else{//在遊戲中某人已佔領且玩家已解過題目||不在遊戲中||遊戲結束=>取消按鈕
             suc_btn.classList.add('disabled');
             suc_text.onclick="";
             fail_btn.classList.add('disabled');
             fail_text.onclick="";
-            if ( isPlayer ){
+            if ( isPlayer && !gameEnded){
                 if(hasSolvedAllProblems){
                     suc_text.textContent='你完全解完這站ㄌ而且無法佔領，不爽告我ㄚ';
                 }else{
                     suc_text.textContent='此站仍有未解之題，請移至此站其他題目';
                 }
+            }else if(isInGame && gameEnded){ //有加入遊戲，且遊戲結束(無論是否是玩家)
+                suc_text.textContent='遊戲結束ㄌ';
             }else{
                 suc_text.textContent='你還不是玩家ㄛ，快加入遊戲ㄅ!';
             }

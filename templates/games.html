@@ -14,6 +14,7 @@
             <br>
             <span><a href="{{ url_for('showgame', gameid=game.gameid) }}">view game</a></span>
             <span><a href="{{url_for('login', gameid=game.gameid)}}">join game</a></span>
+            <span><a href="{{url_for('deletegame', gameid=game.gameid)}}" style="color:#ff0000;">delete game</a></span>
         </div>
         <hr>
     {% endfor %}

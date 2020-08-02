@@ -12,6 +12,7 @@ sess=Session()
 sess.init_app(app)
 
 app.jinja_env.globals.update(Player=Player)
+app.jinja_env.globals.update(Game=Game)
 app.jinja_env.globals.update(getEverOwnedStations=Player.getEverOwnedStations)
 app.jinja_env.globals.update(hasSolvedProblem=Player.hasSolvedProblem)
 app.jinja_env.globals.update(hasSolvedAllProblems=Player.hasSolvedAllProblems)
@@ -123,22 +124,63 @@ def register_submit(gameid):
     return redirect(url_for('home'))
 @app.route('/logout',methods=('POST',))
 @check_if_is_player
-def logout():
-    Game.logout(player:=Player(session['player_id']))
-    flash(f'logged out from player {player.name}({player.id}).')
+def logout():#need to check if the player exists(user will have playerid while the player doesn't exist if the game has been deleted)
+    try:
+        Game.logout(player:=Player(session['player_id']))
+        flash(f'logged out from player {player.name}({player.id}).')
+    except Player.PlayerNotFoundError as e:
+        flash(str(e))
+        session.pop('player_id')
+
     return redirect(url_for('home'))
 @app.route('/quitgame',methods=('POST',))
 @check_if_in_game
-def quitgame():
+def quitgame():#no matter whether the game exists, just clear the session
     gameid=session['game']
     Game.quitgame()
     flash(f"quitted game {gameid}.")
     return redirect(url_for('home'))
-@app.route('/games/<string:gameid>/end')
-def endgame():
-    return 'none'
+@app.route('/games/<string:gameid>/end',methods=('POST','GET'))
+def endgame(gameid):
+    try:
+        game = Game(gameid)
+    except Game.GameNotFoundError:
+        flash('找不到此遊戲')
+        return redirect(url_for('home'))
 
+    if request.method=='POST' or session.get('auth_id')=='admin':
+        game.end()
+        return redirect(url_for('home'))
+    else:
+        return start_auth(
+            description='enter GAME KEY or SECRET KEY',
+            correct_keys=[game.secret_key,app.config['SECRET_KEY']],
+            referer=url_for('endgame',gameid=gameid),
+            method='post',
+            setSession=False
+        )
 
+@app.route('/games/<string:gameid>/delete',methods=('POST','GET'))
+def deletegame(gameid):
+    try:
+        game = Game(gameid)
+    except Game.GameNotFoundError:
+        flash('找不到此遊戲')
+        return redirect(url_for('home'))
+
+    if request.method=='POST' or session.get('auth_id')=='admin':
+        game.delete()
+        flash('successfully deleted game %s!'%gameid)
+
+        return redirect(url_for('home'))
+    else:
+        return start_auth(
+            description='enter GAME KEY or SECRET KEY',
+            correct_keys=[game.secret_key,app.config['SECRET_KEY']],
+            referer=url_for('deletegame',gameid=gameid),
+            method='post',
+            setSession=False
+        )
 
 
 @app.route('/games')
@@ -186,7 +228,7 @@ def sql_query_execute():
     commands=[command.split()[0].upper() for command in sql.split(';') if command]
     ALLOWED_COMMANDS={'SELECT'}
     print('sql:',repr(sql),',','db_filename:',db_filename,',','commands:',commands,',','pretty-print:',prettyprint)
-    if [command for command in commands if command not in ALLOWED_COMMANDS]==[] or session.get('auth')=='admin':
+    if [command for command in commands if command not in ALLOWED_COMMANDS]==[] or session.get('auth_id')=='admin':
         print(f'find command {commands}!!!')
         if not prettyprint:
             results = executeSQL_fetchall(sql, db_filename)
@@ -244,7 +286,7 @@ def auth():
         description=request.args.get('description')
         return render_template('auth.html',referer=referer,description=description)
 
-def start_auth(*,description,correct_keys,referer,method,setSession,session_key,correct_value,wrong_value):
+def start_auth(*,description,correct_keys,referer,method,setSession,session_key=None,correct_value=None,wrong_value=None):
     session['auth']={'keys':correct_keys,
                      'method':method,
                      'setSession':setSession,

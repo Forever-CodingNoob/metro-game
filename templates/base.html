@@ -53,6 +53,15 @@
             color:#ffffff;
             background-color:#00e5ff;
         }
+        .game-info-text#gameStatus{
+            border-color:#f09000;
+            color:#ffffff;
+            background-color:#f09000;
+            border-radius:1px;
+        }
+
+
+
         .text{
             font-family: source-han-sans-traditional, sans-serif;
             font-weight: 200;
@@ -300,6 +309,17 @@
 
 
             <ul class="nav navbar-nav ml-auto">
+                {% if session['game'] is defined %}
+                    <li>
+                        <span class="game-info-text" id="gameStatus">
+                            {% if Game(session['game']).status=='ended' %}
+                                結束
+                            {% else %}
+                                進行中
+                            {% endif %}
+                        </span>
+                    </li>
+                {% endif %}
                 {% if session['player_id'] is defined %}
                     <li>
                         <span class="game-info-text" id="player_name">PlayerName:{{Player(session['player_id']).name}}({{session['player_id']}})</span>
@@ -328,8 +348,13 @@
                 <li class="dropdown active">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
                     <ul class="dropdown-menu dropdown-menu-right">
+                        {% if Game(session['game']).status!='ended' %}
                         <li class="dropdown-item">
                             <a class="nav-link" href="{{url_for('endgame',gameid=session['game'])}}">END GAME</a>
+                        </li>
+                        {% endif %}
+                        <li class="dropdown-item">
+                            <a class="nav-link" href="{{url_for('deletegame',gameid=session['game'])}}">DELETE GAME</a>
                         </li>
                     </ul>
                 </li>

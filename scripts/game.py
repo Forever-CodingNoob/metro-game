@@ -21,9 +21,13 @@ def startGame(players_amount,gamename=''):
         break
     print('gameid:',gameid)
 
+    #summon game secret_key
+    secret_key=getRandSymbol(10)
+    print('game_secret_key:',secret_key)
+
     #add a new game to sqlite
     cur=conn.cursor()
-    cur.execute(f"INSERT INTO games(id,status,players_amount,name) VALUES('{gameid}','starting',{players_amount},'{gamename}')")
+    cur.execute(f"INSERT INTO games(id,status,players_amount,name,secret_key) VALUES('{gameid}','starting',{players_amount},'{gamename}','{secret_key}')")
     conn.commit()
     conn.close()
 
@@ -68,6 +72,8 @@ class Game:
         pass
     class LoginError(Exception):
         pass
+    class GameEndedError(Exception):
+        pass
     def __init__(self,gameid):
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur=conn.cursor()
@@ -84,6 +90,7 @@ class Game:
         self.status=game_info['status']
         self.players_amount=game_info['players_amount']
         self.current_players_amount=len(Player.getAllplayer_ids(self.gameid))
+        self.secret_key=game_info['secret_key']
         #too slow=>self.players=Player.getAllplayers(gameid)
         #game_info_dict={'gameid':game_info['id']}
     @staticmethod
@@ -140,6 +147,45 @@ class Game:
     def quitgame():
         session.pop('player_id',None)
         session.pop('game')
+
+    def end(self):
+        self.setStatus('ended')
+    def delete(self):
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"""DELETE FROM players WHERE gameid='{self.gameid}';
+                        DELETE FROM games WHERE id='{self.gameid}';""")
+        conn.commit()
+        conn.close()
+
+        conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
+        conn.cursor().execute(f'DROP TABLE {self.gameid}')
+        conn.commit()
+        conn.close()
+
+        conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+        conn.cursor().execute(f'DROP TABLE {self.gameid}')
+        conn.commit()
+        conn.close()
+
+        if session.get('game')==self.gameid:#使用者有gameid=>清掉
+            Game.quitgame()
+
+    def setStatus(self,status):
+        self.status=status
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"UPDATE games SET status='{status}' WHERE id='{self.gameid}'")
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def notAllow_if_gameIsEnded(func):
+        def wrapped(player_obj,*arg,**kwargs):
+            if Game(player_obj.gameid).status=='ended':
+                raise Game.GameEndedError(f'function {func.__name__} is not allowed while the game is ended!')
+            return func(*arg,**kwargs)
+        return wrapped
 
 class Player:
     class PlayerNotFoundError(Exception):
@@ -263,6 +309,7 @@ class Player:
             conn.close()
         print('successfully occupied this station!')
 
+    @Game.notAllow_if_gameIsEnded
     def success(self,station_obj):
         try:
             self.solved(station_obj)
@@ -274,8 +321,14 @@ class Player:
             self.occupy(station_obj)
         except Game.OccupyError as e:#someone has already owned this station
             print('error:',str(e))
+
+    @Game.notAllow_if_gameIsEnded
     def fail(self,station_obj):
         self.addPoint(Score['mission_fail'])
+
+
+
+
     def setScore(self,score):
         self.score=score
         conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
