@@ -4,10 +4,11 @@ from .score import Score
 from flask import session
 import random,pytz
 NUMBERS=[chr(i) for i in range(48,58)]
-ALPHABETS=[chr(i) for i in range(65,91)]+[chr(i) for i in range(97,123)]
-SYMBOLS=NUMBERS+ALPHABETS
+LOWER_ALPHABETS=[chr(i) for i in range(97,123)]
+UPPER_ALPHABETS=[chr(i) for i in range(65,91)]#postgresql的table沒分大小寫，故都用小寫
+SYMBOLS=NUMBERS+LOWER_ALPHABETS
 def getRandSymbol(length,allowNumberStarting=True):
-    return "".join([random.choice(SYMBOLS)  if i!=0 or allowNumberStarting else random.choice(ALPHABETS) for i in range(length)])
+    return "".join([random.choice(SYMBOLS)  if i!=0 or allowNumberStarting else random.choice(LOWER_ALPHABETS) for i in range(length)])
 def startGame(players_amount,gamename=''):
     conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
     print('a new game created.')
