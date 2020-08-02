@@ -151,13 +151,6 @@ class Game:
     def end(self):
         self.setStatus('ended')
     def delete(self):
-        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
-        cur=conn.cursor()
-        cur.execute(f"""DELETE FROM players WHERE gameid='{self.gameid}';
-                        DELETE FROM games WHERE id='{self.gameid}';""")
-        conn.commit()
-        conn.close()
-
         conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
         conn.commit()
@@ -165,6 +158,13 @@ class Game:
 
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
         conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
+        conn.commit()
+        conn.close()
+
+        conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
+        cur = conn.cursor()
+        cur.execute(f"""DELETE FROM players WHERE gameid='{self.gameid}';
+                                DELETE FROM games WHERE id='{self.gameid}';""")
         conn.commit()
         conn.close()
 
