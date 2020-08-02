@@ -96,7 +96,7 @@
         var isOwner=Boolean(  {{(station.owner is not none and station.owner.id==session['player_id'])|int}}  );
         var hasSolvedProblem=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedProblem(station.name,station['number']))|int}}  );
         var hasSolvedAllProblems=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedAllProblems(station))|int}}  );
-        var gameEnded=Boolean(  {{(Game(session['game']).status=='ended') |int}}  );
+        var gameEnded=Boolean(  {{(session['game'] is defined and Game(session['game']).status=='ended') |int}}  );
 
         var suc_btn=document.getElementById('success');
         var suc_text=suc_btn.getElementsByTagName('span')[0];
