@@ -159,12 +159,12 @@ class Game:
         conn.close()
 
         conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
-        conn.cursor().execute(f'DROP TABLE {self.gameid}')
+        conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
         conn.commit()
         conn.close()
 
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
-        conn.cursor().execute(f'DROP TABLE {self.gameid}')
+        conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
         conn.commit()
         conn.close()
 
