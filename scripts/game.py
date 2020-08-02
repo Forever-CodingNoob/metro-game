@@ -156,15 +156,19 @@ class Game:
     def end(self):
         self.setStatus('ended')
     def delete(self):
-        conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
-        conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
-        conn.commit()
-        conn.close()
+        try:
+            conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
+            conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
+            conn.commit()
+            conn.close()
 
-        conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
-        conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
-        conn.commit()
-        conn.close()
+            conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+            conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(str(e))
+            '''可能是gameid為數字開頭導致在postgresql用select時table為數字開頭，但postgresql中table不能以數字開頭'''
 
         conn = get_db_connection(DB_NAMES.GAMES_DB_NAME)
         cur = conn.cursor()
