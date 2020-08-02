@@ -193,7 +193,7 @@ class Game:
         def wrapped(player_obj,*arg,**kwargs):
             if Game(player_obj.gameid).status=='ended':
                 raise Game.GameEndedError(f'function {func.__name__} is not allowed while the game is ended!')
-            return func(*arg,**kwargs)
+            return func(player_obj,*arg,**kwargs)
         return wrapped
 
 class Player:
