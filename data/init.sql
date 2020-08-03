@@ -15,5 +15,5 @@ CREATE TABLE line_and_station(
 );
 CREATE TABLE line_name(
 	lineZH TEXT NOT NULL,
-	lineEN TEXT
+	lineEN TEXT NOT NULL
 );

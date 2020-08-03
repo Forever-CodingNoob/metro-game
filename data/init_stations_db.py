@@ -1,11 +1,11 @@
 import csv
 import sqlite3 #sqlite
 import psycopg2 #postgresql
-from scripts import get_db_connection,STATIONS_DB_NAME
+from scripts import get_db_connection,DB_NAMES
 
 #save in local sqlite file
 def init_sqlite():
-    conn=sqlite3.connect('Stations.sqlite')
+    conn=sqlite3.connect(DB_NAMES.STATIONS_DB_NAME)
     with open('init.sql','r') as f:
         conn.executescript(f.read())
     with open('content.csv', 'r',encoding="utf-8-sig") as f:#去除開頭碼(\uxxxx)!
@@ -39,7 +39,7 @@ def init_sqlite():
 
 #save in remote heroku postgresql db
 def init_remote_heroku_postgresql():
-    conn = get_db_connection(STATIONS_DB_NAME)
+    conn = get_db_connection(DB_NAMES.STATIONS_DB_NAME)
     with open('init.sql', 'r') as f:
         cur=conn.cursor()
         cur.execute(f.read())

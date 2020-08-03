@@ -204,7 +204,11 @@ def showgames():
 #     return redirect(url_for('static',filename='img/favicon.ico'))
 @app.route('/')
 def home():
-    return render_template('index.html')
+    if gameid:=session.get('game'):
+        records=Game(gameid).getAllPlayersRecords(app.config['TIMEZONE'])
+    else:
+        records=None
+    return render_template('index.html',records=records)
 @app.route('/johnnysucks',methods=('POST',))
 def johnnysucks():
     PRESS_TIME_DELTA=30
@@ -310,7 +314,7 @@ def gameplay_history():
     player_id=request.args.get('playerid')
     if not player_id:
         abort(404)
-    records=(player:=Player(player_id)).getRecord(pytz.timezone('Asia/Taipei'))
+    records=(player:=Player(player_id)).getRecord(app.config['TIMEZONE'])
     return render_template('record.html',records=records,player=player)
 if __name__=='__main__':
     app.run()

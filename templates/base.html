@@ -339,7 +339,7 @@
             </ul>
             <ul class="nav navbar-nav">
                 {% if session['player_id'] is defined %}
-                <button class="btn btn-danger navbar-btn" onclick="logout();">Give up playing</button>
+                <button class="btn btn-danger navbar-btn" onclick="logout();">Logout</button>
                 <form method="post" action="{{url_for('logout')}}" id="logout_form"></form>
                 {% endif %}
                 {% if session['game'] is defined and session['player_id'] is not defined %}

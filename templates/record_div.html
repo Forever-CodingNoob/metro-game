@@ -1,0 +1,33 @@
+<style>
+    .record-text span{
+        margin:.3rem;
+        color:#ff0000;
+    }
+</style>
+
+{% if records %}
+    {% for record in records %}
+        <hr>
+        <div class="game-info">
+            <span class="badge badge-primary record-timestamp">time:{{record['timestamp_str']}}</span>►
+            <span class="record-text">
+                {% if record['type']=='station' %}
+                    玩家<span>{{record['name']}}</span>佔領了<span>{{record['station']}}</span>站
+                {% elif record['type']=='problem' %}
+                    {% if record['status']=='success' %}
+                        玩家<span>{{record['name']}}</span>成功解完<span>{{record['station']}}</span>站的第<span>{{record['number']}}</span>個任務
+                    {% elif record['status']=='fail' %}
+                        玩家<span>{{record['name']}}</span>未能達成<span>{{record['station']}}</span>站的第<span>{{record['number']}}</span>個任務
+                    {% endif %}
+                {% endif %}
+            </span>
+        </div>
+    {% endfor %}
+{% else %}
+    <br><br><br><br><br><br>
+    <span class="record-text">
+        你點開了紀錄<br>
+        卻沒有東西<br><br><br>
+        像極了愛情
+    </span>
+{% endif %}

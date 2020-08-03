@@ -57,6 +57,7 @@ def startGame(players_amount,gamename=''):
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     station TEXT,
                     problem_number INTEGER,
+                    status TEXT,
                     player_id INTEGER
                     );""")
     conn.commit()
@@ -187,6 +188,12 @@ class Game:
         cur.execute(f"UPDATE games SET status='{status}' WHERE id='{self.gameid}'")
         conn.commit()
         conn.close()
+    def getAllPlayersRecords(self,tz):
+        records = []
+        for player in Player.getAllplayers(self.gameid):
+            records.extend(player.getRecord(tz))
+        records.sort(key=lambda x:x['timestamp'],reverse=True)
+        return records
 
     @staticmethod
     def notAllow_if_gameIsEnded(func):
@@ -219,7 +226,7 @@ class Player:
     def getSolvedProblems(self):#解題歷史(不一定有佔領)
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
         cur=conn.cursor()
-        cur.execute(f"SELECT DISTINCT station,problem_number FROM {self.gameid} WHERE player_id={self.id}")
+        cur.execute(f"SELECT DISTINCT station,problem_number FROM {self.gameid} WHERE player_id={self.id} AND status='success'")
         result=cur.fetchall()
         conn.close()
 
@@ -287,8 +294,8 @@ class Player:
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
         cur=conn.cursor()
         try:
-            cur.execute(f"""INSERT INTO {self.gameid}(station,problem_number,player_id) 
-                            VALUES('{station_obj.name}',{station_obj['number']},{self.id})""")
+            cur.execute(f"""INSERT INTO {self.gameid}(station,problem_number,status,player_id) 
+                            VALUES('{station_obj.name}',{station_obj['number']},'success',{self.id})""")
             conn.commit()
         except Exception as e:
             raise Game.GameTableNotFoundError(f'there is no table for game {self.gameid} in PROBLEMS_SOLVED_DB.')
@@ -337,6 +344,18 @@ class Player:
 
     @Game.notAllow_if_gameIsEnded
     def fail(self,station_obj):
+        # there's no need to check if the player has failed this problem before
+        print(f'player {self.name} failed station {station_obj.name}/{station_obj["number"]}.')
+        conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+        cur=conn.cursor()
+        try:
+            cur.execute(f"""INSERT INTO {self.gameid}(station,problem_number,status,player_id) 
+                        VALUES('{station_obj.name}',{station_obj['number']},'fail',{self.id})""")
+            conn.commit()
+        except Exception as e:
+            raise Game.GameTableNotFoundError(f'there is no table for game {self.gameid} in PROBLEMS_SOLVED_DB.')
+        finally:
+            conn.close()
         self.addPoint(Score['mission_fail'])
 
 
@@ -356,13 +375,13 @@ class Player:
         conn=get_db_connection(DB_NAMES.STATIONOWNED_DB_NAME)
         cur=conn.cursor()
         cur.execute(f'SELECT * FROM {self.gameid} WHERE owner_id={self.id} ORDER BY id DESC')
-        station_results=[{'type':'station','timestamp':i['timestamp'],'station':i['station']} for i in cur.fetchall()]
+        station_results=[{'name':self.name,'type':'station','timestamp':i['timestamp'],'station':i['station']} for i in cur.fetchall()]
         conn.close()
 
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
         cur=conn.cursor()
         cur.execute(f'SELECT * FROM {self.gameid} WHERE player_id={self.id} ORDER BY id DESC')
-        problem_results=[{'type':'problem','timestamp':i['timestamp'],'station':i['station'],'number':i['problem_number']} for i in cur.fetchall()]
+        problem_results=[{'name':self.name,'type':'problem','timestamp':i['timestamp'],'station':i['station'],'number':i['problem_number'],'status':i['status']} for i in cur.fetchall()]
         conn.close()
 
 
@@ -370,7 +389,7 @@ class Player:
         sorted.sort(key=lambda x:x['timestamp'],reverse=True)
         for i in sorted:#調整時區
             utc_time=pytz.utc.localize(i['timestamp'])
-            i['timestamp']=utc_time.astimezone(tz).strftime('%Y年 %m月 %d日 %H點 %M:%S')
+            i['timestamp_str']=utc_time.astimezone(tz).strftime('%Y年 %m月 %d日 %H點 %M:%S')
         print('sorted_history:',sorted)
         return sorted
 
