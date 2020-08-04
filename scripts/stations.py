@@ -84,5 +84,5 @@ class Station(dict):
         return ownerid
 
 '''
-佔領玩家的playerid若是None，則表示該站變為公有地
+佔領玩家的playerid(owner_id)若是NULL，則表示該站變為公有地
 '''

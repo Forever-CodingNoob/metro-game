@@ -18,7 +18,7 @@ app.jinja_env.globals.update(hasSolvedProblem=Player.hasSolvedProblem)
 app.jinja_env.globals.update(hasSolvedAllProblems=Player.hasSolvedAllProblems)
 
 @app.before_request
-def check_if_game_exits():
+def check_if_game_exists():
     if gameid:=session.get('game'):
         try:
             game = Game(gameid)
@@ -73,8 +73,29 @@ def fail_station(station):#解題失敗
     return redirect(url_for('home'))
 @app.route('/station/<path:station>')
 def just_show_station(station):
+    '''檢查過路費並收取'''
+    if session.get('player_id'):
+        return redirect(url_for('check_toll',station=station,number=0))
     return redirect(url_for('show_station',station=station,number=0))
 
+@app.route('/check_toll',methods=('GET','POST'))
+@check_if_is_player
+def check_toll():
+    '''檢查過路費'''
+    print('checking tolls.....')
+    station_name=request.args.get('station')
+    if not station_name:
+        abort(404)
+    problem_number=int(request.args.get('number','0'))
+    player=Player(session['player_id'])
+    station=Station(station_name,problem_number,gameid=session['game'])
+    if request.method=='GET':
+        if tolls:=player.check_tolls(station,check_only=True):
+            return render_template('check_tolls.html',tolls=tolls)
+    else:
+        player.check_tolls(station)
+
+    return redirect(url_for('show_station',station=station_name,number=problem_number))
 
 
 

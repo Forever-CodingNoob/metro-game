@@ -64,16 +64,16 @@ def getDBurl(db_filename):
     #get db url=>windows:heroku cli in terminal, heroku:env variables
     try:  # running on heroku
         db_config_name = os.environ[db_filename]
-        print('running on heroku...')
-        print('db_config_name:', repr(db_config_name))
+        #print('running on heroku...')
+        #print('db_config_name:', repr(db_config_name))
 
         db_url = os.environ[db_config_name]
     except KeyError:  # running on windows
-        print('running on local...')
-        print(f'heroku config:get {db_filename} --app {APP_NAME}')
+        #print('running on local...')
+        #print(f'heroku config:get {db_filename} --app {APP_NAME}')
         # get db congif name takes much time
         db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1]  # 去掉換行符號\n
-        print('db_config_name:', repr(db_config_name))
+        #print('db_config_name:', repr(db_config_name))
 
         db_url = os.popen(f"heroku config:get {db_config_name} --app {APP_NAME}").read()[:-1]  # 去掉換行符號\n
     except Exception as e:
@@ -105,25 +105,25 @@ def get_local_sqlite_db_connection(db_filename):
 # manipulation db using psycopg2
 # (db_url needed, get it from either environment variables(heroku) or heroku cli(windows))
 def get_db_connection(db_filename,cursor_factory=psycopg2.extras.DictCursor):
-    print(f"getting heroku postgresql conn for {db_filename}....")
+    #print(f"getting heroku postgresql conn for {db_filename}....")
     if HEROKU_DB_URL[db_filename]:
-        print('find stored db url!!!')
+        #print('find stored db url!!!')
         db_url = HEROKU_DB_URL[db_filename]
     else:
-        print('no db url stored, getting a new one...')
+        #print('no db url stored, getting a new one...')
         db_url=getDBurl(db_filename)
         HEROKU_DB_URL[db_filename]=db_url#save db url
 
     #db的url中已經有host,port,password,user,database等資訊，只要把整坨放入connect()中它就會知道了
     #當然亦可把資料拆開，再以parameter的形式丟進去(但這裡採用整坨放)
-    print('db_url:',repr(db_url))
+    #print('db_url:',repr(db_url))
     conn = psycopg2.connect(db_url, sslmode='require',cursor_factory=cursor_factory)
     cur=conn.cursor()
     cur.execute("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
     # type(conn)==psycopg2.extensions.connection
     # type(cur) ==psycopg2.extras.DictCursor
     # type(Row) ==psycopg2.extras.DictRow
-    print(f'tables in {db_filename}:',[i['tablename'] for i in cur.fetchall()])
+    #print(f'tables in {db_filename}:',[i['tablename'] for i in cur.fetchall()])
     cur.close()
     return conn
 # conn=get_db_connection(STATIONS_DB_NAME)

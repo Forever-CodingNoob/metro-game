@@ -65,7 +65,7 @@ def startGame(players_amount,gamename=''):
 
     return secret_key
 def getCurrentGameId():
-    return "" if not session['game'] else session['game']
+    return session.get('game',"")
 
 class Game:
     class GameNotFoundError(Exception):
@@ -393,7 +393,18 @@ class Player:
         print('sorted_history:',sorted)
         return sorted
 
-
+    def check_tolls(self,station_obj,*,check_only=False):
+        '''檢查過路費'''
+        if station_obj.owner and station_obj.owner.id!=self.id:#該站有占領者且不是自己
+            if check_only:
+                return {'owner':station_obj.owner,'player':self,'tolls':Score['pay_tolls']*(-1)}
+            else:
+                station_obj.owner.addPoint(Score['get_tolls'])
+                self.addPoint(Score['pay_tolls'])
+                print(f"player {station_obj.owner.name} gets {Score['get_tolls']} points from player {self.name}!")
+        else:
+            if check_only:
+                return None
 
 
 
