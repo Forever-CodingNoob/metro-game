@@ -356,6 +356,9 @@ class Player:
     def success(self,station_obj):
         needtoDrawCard=False
         try:
+            if station_obj.name=='東門':
+                self.addPoint(Score['jail'])
+                raise Game.SolveError('this station is jail, u cannot solve problems here.')
             self.solved(station_obj)
         except Game.SolveError as e:
             print('error:',str(e))
