@@ -354,11 +354,14 @@ class Player:
 
     @Game.notAllow_if_gameIsEnded
     def success(self,station_obj):
+        if station_obj.name == '東門':
+            self.addPoint(Score['jail'])
+            return True
+
+
+
         needtoDrawCard=False
         try:
-            if station_obj.name=='東門':
-                self.addPoint(Score['jail'])
-                raise Game.SolveError('this station is jail, u cannot solve problems here.')
             self.solved(station_obj)
         except Game.SolveError as e:
             print('error:',str(e))
@@ -377,6 +380,10 @@ class Player:
 
     @Game.notAllow_if_gameIsEnded
     def fail(self,station_obj):
+        if station_obj.name == '東門':
+            self.addPoint(Score['jail'])
+            return
+
         # there's no need to check if the player has failed this problem before
         print(f'player {self.name} failed station {station_obj.name}/{station_obj["number"]}.')
         conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
@@ -390,6 +397,7 @@ class Player:
         finally:
             conn.close()
         self.addPoint(Score['mission_fail'])
+
 
 
 
