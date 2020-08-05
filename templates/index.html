@@ -113,7 +113,34 @@
     {% if session['game'] is defined %}
         <hr>
         <div class="title">Dashboard</div>
-        {% include 'record_div.html' %}
+        <hr>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Player</th>
+                    <th scope="col">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                    {% if score['id']==session['player_id'] %}
+                        <tr class="table-info">
+                            <td scope="col">{{score['name']}}</td>
+                            <td scope="col">{{score['score']}}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td scope="col">{{score['name']}}</td>
+                            <td scope="col">{{score['score']}}</td>
+                        </tr>
+                    {% endif %}
+
+                {% endfor %}
+            </tbody>
+        </table>
+        <div>
+            {% include 'record_div.html' %}
+        </div>
     {% endif %}
 
     <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>-->

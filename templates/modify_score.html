@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %} 分數加減 {% endblock %}
+{% block content %}
+    <style>
+        .sbutton {
+              color: black;
+              padding: 4px 10px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              margin: 6px 2px;
+              transition-duration: 0.2s;
+              cursor: pointer;
+        }
+        .sbutton:hover {
+              background-color: grey;
+              color: white;
+        }
+    </style>
+    <form method="post" id="form-modifyScore">
+        <div class="title-form">人工分數加減</div>
+        <div class="form-group"><h4>現在玩家 {{player.name}} 有 {{player.score}} 分</h4></div>
+        <div class="form-group">
+            <label for="points">要加減的分數(例如要加1分就選1)</label>
+            <input type="number" name="points" id="points"
+                   min="-5" max="3" value="{{request.form['points'] or 0}}" class="form-control">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-warning sbutton">確認</button>
+        </div>
+    </form>
+{% endblock %}

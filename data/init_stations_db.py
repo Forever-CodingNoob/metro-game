@@ -71,6 +71,16 @@ def init_remote_heroku_postgresql():
         cur.close()
     conn.commit()
 
+    with open('cards.csv', 'r', encoding="utf-8-sig") as f:  # 去除開頭碼(\uxxxx)!
+        reader = csv.reader(f)
+        columns = next(reader)
+        cur = conn.cursor()
+        for data in reader:
+            data = [f"'{i}'" for i in data]  # 加上引號
+            cur.execute(f'INSERT INTO cards({",".join(columns)}) VALUES({",".join(data)})')
+        cur.close()
+    conn.commit()
+
     #sort
     with open('sort_postgresql.sql', 'r') as f:
         cur=conn.cursor()

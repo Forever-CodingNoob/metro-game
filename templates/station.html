@@ -89,6 +89,11 @@
                 fail_form.submit();
             }
         }
+        function just_draw_card(){
+            if(confirm('你確定要抽卡/劵?')){
+                window.location.href="{{url_for('drawCard',station=station.name,number=station['number'])|safe}}";
+            }
+        }
 
         var isPlayer=Boolean(  {{session['player_id'] is defined|int}}  );
         var isInGame=Boolean(  {{session['game'] is defined|int}}  );
@@ -124,9 +129,9 @@
                 suc_text.textContent='解題成功，但其他人早就占領此站ㄌ';
             }
         }else if(isPlayer && !gameEnded && hasSolvedAllProblems && problemGrade=='特殊站' && hasOwner){//在遊戲中且尚未結束且為特殊站且有占領者且已解過該站的所有題目
-            suc_text.onclick="{{url_for('drawCard',station=station.name,number=station['number'])}}";
             fail_btn.classList.add('disabled');
             fail_text.onclick="";
+            suc_text.onclick=just_draw_card;
             suc_text.textContent='你完全解完這站ㄌ，但這是特殊站，按我以抽卡';
         }else{//在遊戲中某人已佔領且玩家已解過題目||不在遊戲中||遊戲結束=>取消按鈕
             suc_btn.classList.add('disabled');
@@ -154,7 +159,9 @@
 
         if(hasSolvedProblem&&isPlayer){
             document.getElementById('problem').style.display='none';
-            document.getElementById('show_ans').style.display='none';
+            try{
+                document.getElementById('show_ans').style.display='none';
+            }catch(e){}
         }
     </script>
 {% endblock %}

@@ -251,6 +251,27 @@
         #form-card{
             font-family: 'Noto Sans TC', sans-serif;
         }
+        #form-modifyScore{
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .card-info{
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .card-info #cardName{
+            font-size:2em;
+            margin:5px 0px;
+        }
+        .card-info #cardDescription{
+            font-size:1em;
+            color:#162029;
+        }
+        .card-info #type{
+            font-size:1em;
+        }
+        .btn-independent{
+            font-family: 'Noto Sans TC', sans-serif;
+            margin:20px 0px;
+        }
         *{
             /*border:1px solid #000;*/
         }
@@ -307,7 +328,7 @@
                     <a class="nav-link" href="{{url_for('gameplay_history',playerid=session['player_id'])}}">紀錄</a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">特殊卡</a>
+                    <a class="nav-link" href="{{url_for('showcards')}}">特殊卡</a>
                 </li>
                 {% endif %}
                 <li class="dropdown active">

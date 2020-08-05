@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %} 特殊卡 {% endblock %}
+{% block content %}
+    <div class="title">特殊卡</div>
+    <button class="btn btn-outline-secondary btn-lg btn-independent" onclick="location.href='{{ url_for('modify_score') }}';">直接改分數</button>
+    {% for card in cards %}
+        <hr>
+        <div class="card-info">
+            <div id="cardName">{{card.name}}</div>
+            <div id="cardDescription"><h3>{{card.description}}</h3></div>
+            <span class="badge badge-warning badge-pill" id="type">種類:{{card.type}}</span>
+            <a href="{{url_for('deletecard',cardid=card.id, gameid=card.owner.gameid)}}"><button type="button" class="btn btn-danger btn-sm">delete card</button></a>
+        </div>
+    {% endfor %}
+{% endblock %}

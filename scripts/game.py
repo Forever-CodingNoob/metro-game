@@ -211,7 +211,13 @@ class Game:
             records.extend(player.getRecord(tz))
         records.sort(key=lambda x:x['timestamp'],reverse=True)
         return records
-
+    def getAllPlayersScore(self):
+        conn=get_db_connection(DB_NAMES.GAMES_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"SELECT id,name,score FROM players WHERE gameid='{self.gameid}'")
+        results=cur.fetchall()
+        conn.close()
+        return [{'id':i['id'],'name':i['name'],'score':i['score']} for i in results]
     @staticmethod
     def notAllow_if_gameIsEnded(func):
         def wrapped(player_obj,*arg,**kwargs):
@@ -354,7 +360,7 @@ class Player:
         except Game.SolveError as e:
             print('error:',str(e))
         else:
-            if station_obj.grade=='特殊站':#在特殊站成功解完題目
+            if station_obj.grade=='特殊站':#若在特殊站成功解完題目=>抽卡
                 needtoDrawCard=True
 
 
@@ -441,5 +447,38 @@ class Player:
         conn.commit()
         conn.close()
 
+    def getAllCards(self):
+        conn=get_db_connection(DB_NAMES.CARDS_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"SELECT id,card_name FROM {self.gameid} WHERE player_id={self.id} ORDER BY timestamp DESC")
+        cards=cur.fetchall()
+        conn.close()
+
+        return [Card(card['id'],card['card_name'],self) for card in cards]
+
 
 #datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+
+
+
+class Card:
+    def __init__(self,id,name,owner):
+        conn=get_db_connection(DB_NAMES.STATIONS_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"SELECT * FROM cards WHERE name='{name}'")
+        card=cur.fetchone()
+        conn.close()
+        self.id=id
+        self.owner=owner
+        self.name=card['name']
+        self.description=card['description']
+        self.type=card['type']
+    @staticmethod
+    def delete(cardid,*,gameid):
+        conn = get_db_connection(DB_NAMES.CARDS_DB_NAME)
+        cur = conn.cursor()
+        cur.execute(f"DELETE FROM {gameid} WHERE id={cardid}")
+        conn.commit()
+        conn.close()

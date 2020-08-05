@@ -1,5 +1,5 @@
 from flask import Flask,url_for,redirect,render_template,flash,Request,request,session,abort
-from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml,Player
+from scripts import Station,startGame,Game,config_db_url,DB_NAMES,executeSQL_fetchall,executeSQL_terminal_inhtml,Player,Card
 import time,pytz
 from flask_session import Session
 
@@ -62,7 +62,7 @@ def occupy_station(station):#解題||佔領
     needtoDrawCard = Player(player_id).success(Station(station,number,gameid=gameid))
     if needtoDrawCard:
         return redirect(url_for('drawCard',station=station,number=number))
-    return redirect(url_for('show_station',station=station,number=number))
+    return redirect(url_for('home'))
 
 @app.route('/<path:station>/fail',methods=('POST',))#?number=problem number
 @check_if_is_player
@@ -101,18 +101,19 @@ def check_toll():
 @app.route('/drawCard',methods=('POST','GET'))
 @check_if_is_player
 def drawCard():
+    print(request.args)
     station_name=request.args.get('station')
     problem_number=int(request.args.get('number'))
     if not station_name:
         abort(403)
     if request.method=='GET':
-        return render_template('draw_card.html',station=station_name)
+        return render_template('draw_card.html')
     else:
         if not(card:=request.form.get('card')):
             flash('SELECT a card!')
-            return render_template('draw_card.html',station=station_name)
+            return render_template('draw_card.html')
         Player(session['player_id']).addCard(card,station_name=station_name)
-        return redirect(url_for('show_station',station=station_name,number=problem_number))
+        return redirect(url_for('home'))
 
 
 
@@ -236,6 +237,37 @@ def deletegame(gameid):
 def showgames():
     games=Game.getAllGames()
     return render_template('games.html',games=games)
+@app.route('/cards')
+@check_if_is_player
+def showcards():
+    cards=Player(session['player_id']).getAllCards()
+    return render_template('cards.html',cards=cards)
+@app.route('/cards/delete')
+@check_if_is_player
+def deletecard():
+    cardid = request.args.get('cardid')
+    gameid = request.args.get('gameid')
+    if not cardid or not gameid:
+        abort(403)
+    Card.delete(cardid,gameid=gameid)
+    return redirect(url_for('showcards'))
+@app.route('/modifyscore',methods=('GET','POST'))
+@check_if_is_player
+def modify_score():
+    playerid=request.args.get('player_id') if session.get('auth_id')=='admin' else None
+    if playerid is None:
+        playerid=session['player_id']
+    player=Player(playerid)
+    if request.method=='POST':
+        points=request.form['points']
+        if not points:
+            flash('請輸入數字')
+        points=int(points)
+        player.addPoint(points)
+        flash(f"玩家{player.name}的分數{'%+d'%points}")
+
+    return render_template('modify_score.html',player=player)
+
 
 # @app.route('/favicon.ico')
 # def img():
@@ -243,11 +275,13 @@ def showgames():
 #     return redirect(url_for('static',filename='img/favicon.ico'))
 @app.route('/')
 def home():
+    records = None
+    scores = None
     if gameid:=session.get('game'):
-        records=Game(gameid).getAllPlayersRecords(app.config['TIMEZONE'])
-    else:
-        records=None
-    return render_template('index.html',records=records)
+        game=Game(gameid)
+        records=game.getAllPlayersRecords(app.config['TIMEZONE'])
+        scores=game.getAllPlayersScore()
+    return render_template('index.html',records=records,scores=scores)
 @app.route('/johnnysucks',methods=('POST',))
 def johnnysucks():
     PRESS_TIME_DELTA=30
