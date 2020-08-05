@@ -59,7 +59,9 @@ def occupy_station(station):#解題||佔領
     gameid = session['game']
     player_id=session['player_id']
 
-    Player(player_id).success(Station(station,number,gameid=gameid))
+    needtoDrawCard = Player(player_id).success(Station(station,number,gameid=gameid))
+    if needtoDrawCard:
+        return redirect(url_for('drawCard',station=station,number=number))
     return redirect(url_for('show_station',station=station,number=number))
 
 @app.route('/<path:station>/fail',methods=('POST',))#?number=problem number
@@ -96,6 +98,22 @@ def check_toll():
         player.check_tolls(station)
 
     return redirect(url_for('show_station',station=station_name,number=problem_number))
+@app.route('/drawCard',methods=('POST','GET'))
+@check_if_is_player
+def drawCard():
+    station_name=request.args.get('station')
+    problem_number=int(request.args.get('number'))
+    if not station_name:
+        abort(403)
+    if request.method=='GET':
+        return render_template('draw_card.html',station=station_name)
+    else:
+        if not(card:=request.form.get('card')):
+            flash('SELECT a card!')
+            return render_template('draw_card.html',station=station_name)
+        Player(session['player_id']).addCard(card,station_name=station_name)
+        return redirect(url_for('show_station',station=station_name,number=problem_number))
+
 
 
 

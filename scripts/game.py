@@ -63,6 +63,18 @@ def startGame(players_amount,gamename=''):
     conn.commit()
     conn.close()
 
+    conn = get_db_connection(DB_NAMES.CARDS_DB_NAME)
+    cur = conn.cursor()
+    cur.execute(f"""CREATE TABLE {gameid}(
+                    id SERIAL PRIMARY KEY,
+                    player_id INTEGER,
+                    card_name TEXT,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    station TEXT
+                    );""")
+    conn.commit()
+    conn.close()
+
     return secret_key
 def getCurrentGameId():
     return session.get('game',"")
@@ -164,6 +176,11 @@ class Game:
             conn.close()
 
             conn=get_db_connection(DB_NAMES.PROBLEMSSOLVED_DB_NAME)
+            conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
+            conn.commit()
+            conn.close()
+
+            conn = get_db_connection(DB_NAMES.CARDS_DB_NAME)
             conn.cursor().execute(f'DROP TABLE IF EXISTS {self.gameid}')
             conn.commit()
             conn.close()
@@ -331,16 +348,23 @@ class Player:
 
     @Game.notAllow_if_gameIsEnded
     def success(self,station_obj):
+        needtoDrawCard=False
         try:
             self.solved(station_obj)
         except Game.SolveError as e:
             print('error:',str(e))
+        else:
+            if station_obj.grade=='特殊站':#在特殊站成功解完題目
+                needtoDrawCard=True
+
 
 
         try:
             self.occupy(station_obj)
         except Game.OccupyError as e:#someone has already owned this station
             print('error:',str(e))
+
+        return needtoDrawCard
 
     @Game.notAllow_if_gameIsEnded
     def fail(self,station_obj):
@@ -384,8 +408,13 @@ class Player:
         problem_results=[{'name':self.name,'type':'problem','timestamp':i['timestamp'],'station':i['station'],'number':i['problem_number'],'status':i['status']} for i in cur.fetchall()]
         conn.close()
 
+        conn = get_db_connection(DB_NAMES.CARDS_DB_NAME)
+        cur = conn.cursor()
+        cur.execute(f'SELECT * FROM {self.gameid} WHERE player_id={self.id} ORDER BY id DESC')
+        cards_results = [{'name': self.name, 'type': 'card', 'timestamp': i['timestamp'], 'station': i['station'], 'card_name':i['card_name']} for i in cur.fetchall()]
+        conn.close()
 
-        sorted=station_results+problem_results
+        sorted=station_results+problem_results+cards_results
         sorted.sort(key=lambda x:x['timestamp'],reverse=True)
         for i in sorted:#調整時區
             utc_time=pytz.utc.localize(i['timestamp'])
@@ -405,7 +434,12 @@ class Player:
         else:
             if check_only:
                 return None
-
+    def addCard(self,card,*,station_name):
+        conn=get_db_connection(DB_NAMES.CARDS_DB_NAME)
+        cur=conn.cursor()
+        cur.execute(f"INSERT INTO {self.gameid}(player_id,card_name,station) VALUES({self.id},'{card}','{station_name}')")
+        conn.commit()
+        conn.close()
 
 
 #datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

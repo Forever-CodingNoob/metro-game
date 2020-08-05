@@ -2,9 +2,9 @@
 
 {% block title %} confirm {% endblock %}
 {% block content %}
-    <form method="post" class="form-auth" id="tolls-form">
+    <form method="post" class="form-auth tolls-confirm" id="tolls-form">
         <div>
-            你確定要繳交過路費 {{tolls['tolls']}}元 給玩家 {{tolls['owner'].name}} 嗎?
+            你確定要繳交過路費<span>{{tolls['tolls']}}元</span>給玩家<span>{{tolls['owner'].name}}</span>嗎?
         </div>
         <button class="btn btn-success" onclick="document.getElementById('tolls-form').submit();">是</button>
         <a href="{{url_for('home')}}"><button class="btn btn-dark">否</button></a>

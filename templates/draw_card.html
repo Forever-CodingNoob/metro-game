@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %} Cardo {% endblock %}
+{% block content %}
+    <style>
+        .sbutton {
+              color: black;
+              padding: 4px 10px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              margin: 6px 2px;
+              transition-duration: 0.2s;
+              cursor: pointer;
+            }
+            .sbutton:hover {
+              background-color: grey;
+              color: white;
+            }
+            .custom-select {
+              position: relative;
+              font-size: 18px;
+            }
+            .otitle{
+                background: #E6EBE8;
+                font-size: 20px;
+            }
+    </style>
+    <div class="title-form">DrawCard \(uwu</div>
+    <form method="post" id="form-card">
+        <div class="form-group">
+            <select class="custom-select" name="card">
+                <optgroup label="土地類特殊券" class="otitle"></optgroup>
+                    <option value="徵收券">徵收券</option>
+                    <option value="蠶食鯨吞">蠶食鯨吞</option>
+                    <option value="公地放領">公地放領</option>
+                    <option value="上車不落則著作，體中何如則祕書">上車不落則著作，體中何如則祕書</option>
+                    <option value="塞防左宗棠">塞防左宗棠</option>
+                <optgroup label="移動類特殊券" class="otitle"></optgroup>
+                    <option value="吃飯彈射券">吃飯彈射券</option>
+                    <option value="振興3倍券">振興3倍券</option>
+                    <option value="隨心所欲券">隨心所欲券</option>
+                    <option value="調頭券">調頭券</option>
+                    <option value="傳送券">傳送券</option>
+                <optgroup label="好卡" class="otitle"></optgroup>
+                    <option value="加分">加分券</option>
+                    <option value="附尖刺魔之盔甲">附尖刺魔之盔甲</option>
+                    <option value="空白券">空白券</option>
+                <optgroup label="壞卡" class="otitle"></optgroup>
+                    <option value="厄運之骰">厄運之骰</option>
+                    <option value="地下錢莊">地下錢莊</option>
+                    <option value="荒地拓墾">荒地拓墾</option>
+                    <option value="森林野火">森林野火</option>
+                    <option value="火災警報">火災警報</option>
+                    <option value="停電">停電</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-warning sbutton">確認</button>
+        </div>
+    </form>
+{% endblock %}

@@ -97,6 +97,7 @@
         var hasSolvedProblem=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedProblem(station.name,station['number']))|int}}  );
         var hasSolvedAllProblems=Boolean(  {{(session['player_id'] is defined and Player(session['player_id']).hasSolvedAllProblems(station))|int}}  );
         var gameEnded=Boolean(  {{(session['game'] is defined and Game(session['game']).status=='ended') |int}}  );
+        var problemGrade='{{station.grade}}';
 
         var suc_btn=document.getElementById('success');
         var suc_text=suc_btn.getElementsByTagName('span')[0];
@@ -116,12 +117,17 @@
             }else{
                 suc_text.textContent='成功並佔領';
             }
-        }else if(!hasSolvedProblem && isPlayer && !gameEnded){//沒做過題目且在遊戲中
+        }else if(!hasSolvedProblem && isPlayer && !gameEnded){//沒做過題目且在遊戲中且有人佔領
             if (isOwner){
                 suc_text.textContent='解題成功，但你早就占領此站ㄌ';
             }else{
                 suc_text.textContent='解題成功，但其他人早就占領此站ㄌ';
             }
+        }else if(isPlayer && !gameEnded && hasSolvedAllProblems && problemGrade=='特殊站' && hasOwner){//在遊戲中且尚未結束且為特殊站且有占領者且已解過該站的所有題目
+            suc_text.onclick="{{url_for('drawCard',station=station.name,number=station['number'])}}";
+            fail_btn.classList.add('disabled');
+            fail_text.onclick="";
+            suc_text.textContent='你完全解完這站ㄌ，但這是特殊站，按我以抽卡';
         }else{//在遊戲中某人已佔領且玩家已解過題目||不在遊戲中||遊戲結束=>取消按鈕
             suc_btn.classList.add('disabled');
             suc_text.onclick="";
@@ -129,7 +135,11 @@
             fail_text.onclick="";
             if ( isPlayer && !gameEnded){
                 if(hasSolvedAllProblems){
-                    suc_text.textContent='你完全解完這站ㄌ而且無法佔領，不爽告我ㄚ';
+                    if (isOwner){
+                        suc_text.textContent='你完全解完這站ㄌ而且你已經佔領ㄌ，不爽告我ㄚ';
+                    }else{
+                        suc_text.textContent='你完全解完這站ㄌ而且有其他人佔領，不爽告我ㄚ';
+                    }
                 }else{
                     suc_text.textContent='此站仍有未解之題，請移至此站其他題目';
                 }

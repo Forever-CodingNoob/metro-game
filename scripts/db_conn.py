@@ -5,11 +5,13 @@ class DB_NAMES:
     GAMES_DB_NAME = 'GAMES_DB'  # 每局資料db
     STATIONOWNED_DB_NAME = 'STATIONS_OWNED_DB'  # 每局佔領概況db
     PROBLEMSSOLVED_DB_NAME = 'PROBLEMS_SOLVED_DB' # 每局解題概況db
+    CARDS_DB_NAME = 'CARDS_DB' # 擁有特殊卡db
     SESSION_REDIS = 'REDIS' #session(using redis to save data)
 
 SQLITE_NAME={DB_NAMES.STATIONS_DB_NAME:'Stations.sqlite',
              DB_NAMES.GAMES_DB_NAME:'Games.sqlite',
              DB_NAMES.STATIONOWNED_DB_NAME:'StationsOwned.sqlite',
+             DB_NAMES.CARDS_DB_NAME:'Cards.sqlite',
              DB_NAMES.PROBLEMSSOLVED_DB_NAME:'ProblemsSolved.sqlite'}
 APP_NAME="metro-game"
 
@@ -18,6 +20,7 @@ APP_NAME="metro-game"
 HEROKU_DB_URL={DB_NAMES.STATIONS_DB_NAME:None,
                DB_NAMES.GAMES_DB_NAME:None,
                DB_NAMES.STATIONOWNED_DB_NAME:None,
+               DB_NAMES.CARDS_DB_NAME:None,
                DB_NAMES.PROBLEMSSOLVED_DB_NAME:None}
 
 
