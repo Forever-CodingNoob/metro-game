@@ -2,7 +2,8 @@
     {% for record in records %}
         <hr>
         <div class="game-info">
-            <span class="badge badge-primary record-timestamp">time:{{record['timestamp_str']}}</span>►
+            <span class="badge badge-primary record-timestamp">time:{{record['timestamp_str']}}</span>
+            <br>►
             <span class="record-text">
                 {% if record['type']=='station' %}
                     玩家<span>{{record['name']}}</span>佔領了<span>{{record['station']}}</span>站
