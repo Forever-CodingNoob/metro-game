@@ -10,7 +10,7 @@ class Config:
     REDIS_URI = getREDISurl()
     SESSION_TYPE = 'redis'
     SESSION_REDIS = redis.from_url(REDIS_URI)
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=60)
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
 
     '''timezone'''
     TIMEZONE = pytz.timezone('Asia/Taipei')

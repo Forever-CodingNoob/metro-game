@@ -172,6 +172,13 @@ def register_submit(gameid):
         flash(str(e))
         return render_template('register.html',gameid=gameid)
     return redirect(url_for('home'))
+@app.route('/games/<string:gameid>/spectator',methods=('POST',))
+def join_as_spectator(gameid):
+    # make browser remember the game
+    session['game'] = gameid
+    # make browser forget previous player logged in
+    session.pop('player_id', None)
+    return redirect(url_for('home'))
 @app.route('/logout',methods=('POST',))
 @check_if_is_player
 def logout():#need to check if the player exists(user will have playerid while the player doesn't exist if the game has been deleted)
