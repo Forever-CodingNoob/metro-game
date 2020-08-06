@@ -332,10 +332,10 @@ class Player:
         else:
             self.addPoint(Score['special_station_pass'])
 
-    def occupy(self,station_obj):
+    def occupy(self,station_obj,*,force=False):
         print(f"player {self.name} is trying to occupy station {station_obj.name}.")
         #check if this station is vacant
-        if station_obj.owner is not None:
+        if station_obj.owner is not None and not force:
             raise Game.OccupyError(f'this station has already had its owner in game {self.gameid}.')
 
 
