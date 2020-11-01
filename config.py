@@ -11,6 +11,7 @@ class Config:
     SESSION_TYPE = 'redis'
     SESSION_REDIS = redis.from_url(REDIS_URI)
     PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
+    SESSION_KEY_PREFIX = 'metro-game:'
 
     '''timezone'''
     TIMEZONE = pytz.timezone('Asia/Taipei')

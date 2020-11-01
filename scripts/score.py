@@ -7,7 +7,7 @@ Score={
     'meet':3,
     'pay_tolls':-2,
     'get_tolls':2,
-    'collapse':-1,
+    'collapse':-2,
     '7122':3,
     'unlucky_dice1':-1,
     'unlucky_dice2':-1,
