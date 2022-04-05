@@ -339,7 +339,7 @@ def sql_query_execute():
 def system_auth():
     referer=request.args.get('referer',request.headers.get("Referer"))
     return start_auth(
-                description='enter SECREY KEY',
+                description='enter SECRET KEY',
                 correct_keys=[app.config['SECRET_KEY']],
                 referer=referer,
                 method='get',
