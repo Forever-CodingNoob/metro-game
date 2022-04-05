@@ -4,14 +4,12 @@
     <style>
         img[usemap]{
             border: none;
-            width: 100;
+            width: fit-content;
             max-width: 100%;
             height: auto;
         }
     </style>
 
-
-    <!--{{url_for('static', filename= 'img/routemap.jpg')}}-->
     <img src="{{url_for('static', filename= 'img/routemap_2021.png')}}" width="960" height="1286" usemap="#MRTMap">
     <map name="MRTMap">
         <area title="淡水" href="{{url_for('just_show_station',station='淡水')}}" coords="113,78,173,113" shape="rect">

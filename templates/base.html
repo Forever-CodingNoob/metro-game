@@ -315,9 +315,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="nav navbar-nav mr-auto">
-                {% if session['game'] is not defined %}
+                {% if session['player_id'] is not defined %}
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{url_for('showgames')}}">加入遊戲</a>
+                    <a class="nav-link" href="{{ url_for('login', gameid=session['game']) if session['game'] is defined else url_for('showgames') }}">加入遊戲</a>
                 </li>
                 {% endif %}
                 <li class="nav-item active">

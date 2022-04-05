@@ -28,7 +28,7 @@
             <a href="{{url_for('show_station',station=station.name,number=station['number']-1)}}"><span class="badge badge-dark"><--</span></a>
         {% endif %}
     </div>
-    {% if session['game'] is defined or True%}
+    {% if session['game'] is defined %}
         <hr>
         如果你還沒加入游戲看到我，就表示有bug
         <div class="owner owner-blue" id="owner">
