@@ -80,7 +80,7 @@ def getDBurl(db_filename):
     except KeyError:  # running on windows
         # print('running on local...')
         # print(f'heroku config:get {db_filename} --app {APP_NAME}')
-        # get db congif name takes much time
+        # get db config name takes much time
         db_config_name = os.popen(f'heroku config:get {db_filename} --app {APP_NAME}').read()[:-1]  # 去掉換行符號\n
         # print('db_config_name:', repr(db_config_name))
 

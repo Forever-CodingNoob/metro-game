@@ -314,10 +314,10 @@ def modify_score():
     return render_template('modify_score.html', player=player)
 
 
-# @app.route('/favicon.ico')
-# def img():
-#     print("brower is getting favortie icon....")
-#     return redirect(url_for('static',filename='img/favicon.ico'))
+@app.route('/favicon.ico')
+def img():
+    return redirect(url_for('static',filename='img/favicon.ico'))
+
 @app.route('/')
 def home():
     records = None
